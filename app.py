@@ -255,7 +255,7 @@ def collect_inputs():
                     inputs['alpha_deg'] = st.number_input("Custom alpha [deg]", value=23.04, disabled=not ns_pa)
                     inputs['x2'] = st.number_input("Profile shift x2", value=0.0)
 
-                ox1, ox2 = st.rows(2)
+                ox1, ox2 = st.columns(2)
                 with ox1: inputs['sunOffset_xy_mm'] = [st.number_input("Sun offset X [mm]", value=0.0), st.number_input("Sun offset Y [mm]", value=0.0)]
                 with ox2: inputs['carrierOffset_xy_mm'] = [st.number_input("Carrier offset X [mm]", value=0.0), st.number_input("Carrier offset Y [mm]", value=0.0)]
             else:
