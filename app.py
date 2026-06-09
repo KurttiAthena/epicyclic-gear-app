@@ -243,18 +243,17 @@ def collect_inputs():
                 g1, g2 = st.columns(2)
                 with g1:
                     inputs['z1'] = st.number_input("z1 (sun teeth)", value=73)
-                    inputs['z2'] = st.number_input("z2 (planet teeth)", value=26)
                     inputs['z3'] = st.number_input("z3 (ring teeth)", value=125)
                     inputs['beta_deg'] = st.number_input("Helix angle beta [deg]", value=0.0)
                     inputs['aw_mm'] = st.number_input("Center distance aw [mm]", value=99.0)
                     inputs['x1'] = st.number_input("Profile shift x1", value=0.0)
                 with g2:
+                    inputs['z2'] = st.number_input("z2 (planet teeth)", value=26)
                     inputs['m0_mm'] = st.number_input("Module m0 [mm]", value=2.0)
                     inputs['b_face_mm'] = st.number_input("Face width b [mm]", value=25.0)
+                    ns_pa = st.checkbox("Non-standard pressure angle?", False)
+                    inputs['alpha_deg'] = st.number_input("Custom alpha [deg]", value=23.04, disabled=not ns_pa)
                     inputs['x2'] = st.number_input("Profile shift x2", value=0.0)
-					if st.checkbox("Non-standard pressure angle?", False):
-						inputs['alpha_deg'] = st.number_input("Custom alpha [deg]", value=23.04)
-                  
 
                 ox1, ox2 = st.columns(2)
                 with ox1: inputs['sunOffset_xy_mm'] = [st.number_input("Sun offset X [mm]", value=0.0), st.number_input("Sun offset Y [mm]", value=0.0)]
