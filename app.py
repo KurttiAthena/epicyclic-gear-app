@@ -223,7 +223,7 @@ def plot_sens(sens: dict, key: str, xlab: str, tit: str, sym: str) -> go.Figure:
 
 def collect_inputs():
     inputs = {}
-    with st.expander("⚙️ **USER INPUTS CONFIGURATION** (Click to Expand / Collapse)", expanded=True):
+    with st.expander("**USER INPUTS CONFIGURATION** (Click to Expand / Collapse)", expanded=True):
         st.markdown("---")
         
         c1, c2, c3 = st.columns(3)
@@ -364,10 +364,6 @@ def main():
 <b>Sun tilt phi_y [mrad]</b>           : {res['sun_displacement_final'][2]*1e3:.6f}
 <b>Maximum planet force [N]</b>        : {np.max(res['F_final_N']):.6f}
 <b>Active planets at worst phase</b>   : {active_count} / {res['N']}
-<b>Zero error override</b>           : {str(res.get('zero_error_override', False)).lower()}
-<b>Planet-1-only error override</b>  : {str(res.get('single_planet_error_override', False)).lower()}
-<b>Periodic eccentricity enabled</b> : {str(res.get('periodic_ecc_enabled', False)).lower()}
-<b>Periodic stiffness enabled</b>    : {str(res.get('periodic_stiffness_enabled', False)).lower()}
 </div>
             """
             st.markdown(text_block, unsafe_allow_html=True)
