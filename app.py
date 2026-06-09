@@ -247,8 +247,8 @@ def collect_inputs():
                     inputs['z1'] = st.number_input("z1 (sun teeth)", value=73)
                     inputs['z2'] = st.number_input("z2 (planet teeth)", value=26)
                     inputs['z3'] = st.number_input("z3 (ring teeth)", value=125)
-                    inputs['aw_mm'] = st.number_input("Center distance aw [mm]", value=99.0)
                     inputs['x1'] = st.number_input("Profile shift x1", value=0.0)
+                    inputs['aw_mm'] = st.number_input("Center distance aw [mm]", value=99.0)
                 with g2:
                     inputs['m0_mm'] = st.number_input("Module m0 [mm]", value=2.0)
                     inputs['beta_deg'] = st.number_input("Helix angle beta [deg]", value=0.0)
