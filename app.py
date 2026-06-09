@@ -235,9 +235,11 @@ def collect_inputs():
             inputs['alpha_n_deg'] = float(st.selectbox("Normal pressure angle", ["14", "20", "25"], index=1))
             inputs['alpha_deg'] = inputs['alpha_n_deg']
             inputs['bearing_type'] = st.selectbox("Bearing type", ['ball_clearance', 'ball_noclearance', 'standard', 'roller_clearance', 'roller_noclearance'], index=1)
+            st.markdown("---")
+            mod_geom = st.checkbox("Modify geometrical constraints?", False)
+            show_adv = st.checkbox("Show advanced effects?", False)
             
         with c2:
-            mod_geom = st.checkbox("Modify geometrical constraints?", False)
             st.markdown("**Geometry & Offsets**")
             if mod_geom:
                 g1, g2 = st.columns(2)
@@ -251,24 +253,27 @@ def collect_inputs():
                     inputs['m0_mm'] = st.number_input("Module m0 [mm]", value=2.0)
                     inputs['beta_deg'] = st.number_input("Helix angle beta [deg]", value=0.0)
                     inputs['b_face_mm'] = st.number_input("Face width b [mm]", value=25.0)
+                    inputs['x2'] = st.number_input("Profile shift x2", value=0.0)
                     ns_pa = st.checkbox("Non-standard pressure angle?", False)
                     inputs['alpha_deg'] = st.number_input("Custom alpha [deg]", value=23.04, disabled=not ns_pa)
-                    inputs['x2'] = st.number_input("Profile shift x2", value=0.0)
-
                 ox1, ox2 = st.columns(2)
-                with ox1: inputs['sunOffset_xy_mm'] = [st.number_input("Sun offset X [mm]", value=0.0), st.number_input("Sun offset Y [mm]", value=0.0)]
-                with ox2: inputs['carrierOffset_xy_mm'] = [st.number_input("Carrier offset X [mm]", value=0.0), st.number_input("Carrier offset Y [mm]", value=0.0)]
+                with ox1: sx = st.number_input("Sun offset X [mm]", value=0.0)
+                with ox2: sy = st.number_input("Sun offset Y [mm]", value=0.0)
+                inputs['sunOffset_xy_mm'] = [sx, sy]
+                
+                cx1, cx2 = st.columns(2)
+                with cx1: cx = st.number_input("Carrier offset X [mm]", value=0.0)
+                with cx2: cy = st.number_input("Carrier offset Y [mm]", value=0.0)
+                inputs['carrierOffset_xy_mm'] = [cx, cy]
             else:
                 inputs.update(dict(z1=73, z2=26, z3=125, m0_mm=2.0, beta_deg=0.0, aw_mm=99.0, b_face_mm=25.0, x1=0.0, x2=0.0, sunOffset_xy_mm=[0,0], carrierOffset_xy_mm=[0,0]))
                 
         with c3:
-            show_adv = st.checkbox("Show advanced effects?", False)
             st.markdown("**Advanced Effects**")
             if show_adv:
-                inputs['error_preset'] = st.selectbox("Error level", ['fine', 'medium', 'coarse'], index=1)
-                
                 ae1, ae2 = st.columns(2)
                 with ae1:
+                    inputs['error_preset'] = st.selectbox("Error level", ['fine', 'medium', 'coarse'], index=1)
                     inputs['zero_error_override'] = st.checkbox("Zero error override", False)
                     sp = st.checkbox("Error on planet 1 only", False)
                     inputs['single_planet_error_override'] = sp
@@ -278,12 +283,12 @@ def collect_inputs():
                     elvl = st.selectbox("Excitation level", ['Low', 'Medium', 'High'], index=1)
                     inputs['ecc_amp_um'] = {'low':5, 'medium':10, 'high':20}[elvl.lower()] if inputs['enable_periodic_ecc'] else 0
                     
-                    inputs['enable_periodic_stiffness'] = st.checkbox("Enable periodic stiffness", False)
-                    inputs['tvms_amp_scale'] = st.number_input("TVMS scale factor", value=1.0) if inputs['enable_periodic_stiffness'] else 0
-
+                with ae2:
+                    ps = st.checkbox("Enable periodic stiffness", False)
+                    inputs['enable_periodic_stiffness'] = ps
+                    inputs['tvms_amp_scale'] = st.number_input("TVMS scale factor", value=1.0, disabled=not ps)
                     inputs['enable_temperature_effects'] = st.checkbox("Enable thermal effects", False)
                     inputs['temperature_C'] = st.number_input("Operating temp [C]", value=20.0, disabled=not inputs['enable_temperature_effects'])
-                with ae2:
                     inputs['k_support_phi_NmRad'] = st.number_input("Tilt support k_phi [Nm/rad]", value=10000.0)
                     inputs['k_support_w_Nm'] = st.number_input("Settlement support k_w [N/m]", value=0.0)
                     
@@ -298,10 +303,8 @@ def collect_inputs():
         inputs.update(dict(temperature_ref_C=20, enable_thermal_geometry_error=inputs['enable_temperature_effects'], use_auto_thermal_gradient=True, thermal_gradient_ratio=0.1, thermal_gradient_C=0, thermal_hotspot_deg=0, thermal_pin_weight=1.0, thermal_planet_weight=0.7, r_support_mm=inputs['R_sun_mm'], mesh_scale_factor=1.0, bearing_scale_factor=1.0, ecc_phase_deg=0, ecc_order=1, tvms_order=1, tvms_planet_phase_scale=1.0, monte_carlo_base_seed=inputs['seed'], sensitivity_seed=inputs['seed'], nMonteCarlo=50, sensitivity_ecc_values_um=[0,5,10,20,35,50,75,100], sensitivity_mesh_scale_values=[0.05,0.1,0.25,1.0,5.0,10.0,20.0], sensitivity_bearing_scale_values=[0.01,0.05,0.1,1.0,10.0,50.0,100.0]))
         if inputs['zero_error_override']: inputs['tol_override'] = dict(pin_rad_um=0, pin_tan_um=0, runout_um=0, profile_um=0, commonProfile_um=0, commonXY_um=0)
         if inputs['single_planet_error_override']: inputs['zero_error_override'], inputs['tol_override'] = False, dict(pin_rad_um=0, pin_tan_um=0, runout_um=0, profile_um=0, commonProfile_um=0, commonXY_um=0)
-
         st.markdown("---")
         run_btn = st.button("▶ RUN ANALYSIS", type="primary", use_container_width=True)
-
     return inputs, run_btn
 
 def main():
