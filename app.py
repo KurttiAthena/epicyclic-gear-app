@@ -253,7 +253,7 @@ def collect_inputs():
                     inputs['b_face_mm'] = st.number_input("Face width b [mm]", value=25.0)
                     inputs['x2'] = st.number_input("Profile shift x2", value=0.0)
 					if st.checkbox("Non-standard pressure angle?", False):
-                    	inputs['alpha_deg'] = st.number_input("Custom alpha [deg]", value=23.04)
+						inputs['alpha_deg'] = st.number_input("Custom alpha [deg]", value=23.04)
                   
 
                 ox1, ox2 = st.columns(2)
