@@ -282,11 +282,11 @@ def collect_inputs():
                     inputs['enable_periodic_ecc'] = st.checkbox("Enable periodic eccentricity", False)
                     elvl = st.selectbox("Excitation level", ['Low', 'Medium', 'High'], index=1)
                     inputs['ecc_amp_um'] = {'low':5, 'medium':10, 'high':20}[elvl.lower()] if inputs['enable_periodic_ecc'] else 0
-                    
-                with ae2:
                     ps = st.checkbox("Enable periodic stiffness", False)
                     inputs['enable_periodic_stiffness'] = ps
                     inputs['tvms_amp_scale'] = st.number_input("TVMS scale factor", value=1.0, disabled=not ps)
+                    
+                with ae2:
                     inputs['enable_temperature_effects'] = st.checkbox("Enable thermal effects", False)
                     inputs['temperature_C'] = st.number_input("Operating temp [C]", value=20.0, disabled=not inputs['enable_temperature_effects'])
                     inputs['k_support_phi_NmRad'] = st.number_input("Tilt support k_phi [Nm/rad]", value=10000.0)
