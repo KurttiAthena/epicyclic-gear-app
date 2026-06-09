@@ -11,29 +11,34 @@ import plotly.express as px
 import streamlit as st
 from epicyclic_gear_system import EpicyclicGearSystem
 
-st.set_page_config(page_title="Epicyclic Gear System Analysis - V4", layout="wide", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="Epicyclic Gear System Analysis - V4", layout="wide")
 
 # =========================================================================
 # HELPER: Plotly figure defaults
 # =========================================================================
 def _fig_layout(fig: go.Figure, title: str = "", xaxis_title: str = "",
-                yaxis_title: str = "", height: int = 300, **kwargs) -> go.Figure:
-    fig.update_layout(
-        title=dict(text=title, font=dict(size=13, color="black"), x=0.5, y=0.95),
-        xaxis_title=dict(text=xaxis_title, font=dict(size=11, color="black")),
-        yaxis_title=dict(text=yaxis_title, font=dict(size=11, color="black")),
+                yaxis_title: str = "", height: int = 350, **kwargs) -> go.Figure:
+    
+    # Base layout args
+    layout_args = dict(
+        title=dict(text=title, font=dict(size=15, color="black"), x=0.5, y=0.95),
+        xaxis_title=dict(text=xaxis_title, font=dict(size=12, color="black")),
+        yaxis_title=dict(text=yaxis_title, font=dict(size=12, color="black")),
         height=height,
         template="plotly_white",
-        margin=dict(l=40, r=20, t=40, b=40),
-        font=dict(size=10, color="black"),
+        margin=dict(l=50, r=20, t=60, b=50),
+        font=dict(size=11, color="black"),
         plot_bgcolor="white",
         paper_bgcolor="white",
         legend=dict(
             orientation="h", yanchor="top", y=-0.25, x=0.5, xanchor="center",
             bgcolor="rgba(255,255,255,0.8)", bordercolor="gray", borderwidth=1
-        ),
-        **kwargs,
+        )
     )
+    # Safely merge kwargs to prevent duplicate argument errors
+    layout_args.update(kwargs)
+    
+    fig.update_layout(**layout_args)
     fig.update_xaxes(gridcolor="#e0e0e0", zeroline=True, zerolinecolor="#888", showline=True, linewidth=1, linecolor='black', mirror=True)
     fig.update_yaxes(gridcolor="#e0e0e0", zeroline=True, zerolinecolor="#888", showline=True, linewidth=1, linecolor='black', mirror=True)
     return fig
@@ -109,7 +114,6 @@ def plot_schematic(res: dict, R_sun_mm: float) -> go.Figure:
     
     for i in range(N):
         px, py = r_plot * math.cos(psi[i]), r_plot * math.sin(psi[i])
-        # Base size calculation for circles simulating planets
         r_planet = 0.4 * R_sun_mm
         if np.max(lsf) - np.min(lsf) > 1e-4:
             if abs(lsf[i] - np.max(lsf)) < 1e-4:
@@ -133,8 +137,7 @@ def plot_schematic(res: dict, R_sun_mm: float) -> go.Figure:
         tilt_len = 0.9 * R_sun_mm
         fig.add_annotation(x=tilt_len*phi_x/tilt_norm, y=tilt_len*phi_y/tilt_norm, ax=0, ay=0, xref="x", yref="y", axref="x", ayref="y", showarrow=True, arrowhead=2, arrowsize=1.5, arrowcolor="blue", arrowwidth=2)
     
-    # Title margin increased to avoid overlap
-    _fig_layout(fig, "System Schematic (qualitative)", "X [mm]", "Y [mm]", height=300, margin=dict(t=50, b=40, l=40, r=40))
+    _fig_layout(fig, "System Schematic (qualitative)", "X [mm]", "Y [mm]")
     fig.update_yaxes(scaleanchor="x", scaleratio=1)
     return fig
 
@@ -144,7 +147,7 @@ def plot_phase_kgamma(res: dict, mode: str = 'Raw K_gamma') -> go.Figure:
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=phase_deg, y=K_raw, mode='lines', line=dict(width=2, color="#2e86c1"), showlegend=False))
     fig.add_vline(x=worst_deg, line_dash="dash", line_color="red", annotation_text="Worst phase", annotation_textangle=-90)
-    _fig_layout(fig, "Phase Response: K_γ vs Phase", "Phase angle [deg / rad]", "K_γ [-]", yaxis_range=_auto_y_range(K_raw))
+    _fig_layout(fig, f"Phase Response: K_γ vs Phase ({mode})", "Phase angle [deg / rad]", "K_γ [-]", yaxis_range=_auto_y_range(K_raw))
     fig.update_xaxes(**_PHASE_TICKS, range=[0, 360])
     return fig
 
@@ -166,14 +169,14 @@ def plot_phase_planet(res: dict, key: str, title: str, ylabel: str) -> go.Figure
 
 def plot_mc_hist(mc: dict) -> go.Figure:
     fig = go.Figure(data=[go.Histogram(x=mc['K_gamma_max_all'], nbinsx=16, marker_color="#4285F4", marker_line=dict(color="white", width=1))])
-    return _fig_layout(fig, "Monte Carlo: K_γ,max distribution", "K_γ,max [-]", "Count", height=280)
+    return _fig_layout(fig, "Monte Carlo: K_γ,max distribution", "K_γ,max [-]", "Count")
 
 def plot_mc_box(mc: dict, N: int) -> go.Figure:
     fig = go.Figure()
     for i in range(N):
         fig.add_trace(go.Box(y=mc['LSF_worst_all'][i, :], name=f"{i+1}", marker_color=px.colors.qualitative.D3[i % 10], boxmean=True))
     fig.add_hline(y=1.0, line_dash="dash", line_color="red", annotation_text="Ideal=1")
-    return _fig_layout(fig, "Monte Carlo: worst-phase LSF by planet", "Planet index", "Worst-phase LSF [-]", height=280)
+    return _fig_layout(fig, "Monte Carlo: worst-phase LSF by planet", "Planet index", "Worst-phase LSF [-]")
 
 def plot_trend(res: dict, k_w: float, is_stiff: bool) -> go.Figure:
     geom = res.get('geometry')
@@ -190,14 +193,14 @@ def plot_trend(res: dict, k_w: float, is_stiff: bool) -> go.Figure:
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=N_rng, y=y, mode='lines+markers', marker=dict(size=7, color="#2e86c1"), showlegend=False))
     fig.add_trace(go.Scatter(x=[N_cur], y=[y_cur], mode='markers', marker=dict(size=12, color="red"), name=f"Current run: N={N_cur}"))
-    return _fig_layout(fig, tit, "Number of planets", ylab, height=280)
+    return _fig_layout(fig, tit, "Number of planets", ylab)
 
 def plot_sens(sens: dict, key: str, xlab: str, tit: str, sym: str) -> go.Figure:
     if not sens or key not in sens: return go.Figure().add_annotation(text="Disabled", showarrow=False)
     s = sens[key]
     x, y = s.get('values_um', s.get('values', [])), [m['K_gamma_max'] for m in s['metrics']]
     fig = go.Figure(data=[go.Scatter(x=x, y=y, mode='lines+markers', marker=dict(size=8, color="#2e86c1", symbol=sym), line=dict(width=2), showlegend=False)])
-    return _fig_layout(fig, tit, xlab, "Max K_γ [-]", height=240)
+    return _fig_layout(fig, tit, xlab, "Max K_γ [-]")
 
 
 # =========================================================================
@@ -206,8 +209,8 @@ def plot_sens(sens: dict, key: str, xlab: str, tit: str, sym: str) -> go.Figure:
 
 def collect_inputs(c_in):
     inputs = {}
-    c_in.markdown("###### User Inputs")
-    run_btn = c_in.button("RUN ANALYSIS", use_container_width=True)
+    c_in.markdown("### User Inputs")
+    run_btn = c_in.button("▶ RUN ANALYSIS", type="primary", use_container_width=True)
     c_in.markdown("---")
     
     c_in.markdown("**Basic Inputs**")
@@ -269,51 +272,15 @@ def collect_inputs(c_in):
     return inputs, run_btn
 
 def main():
-    # CSS to make the app look like the MATLAB UI with exact panel borders and gray headers
-    st.markdown("""
-    <style>
-    div[data-testid="stVerticalBlockBorderWrapper"] {
-        border: 1px solid #c0c0c0;
-        border-radius: 0;
-        margin-bottom: 0.5rem;
-    }
-    .panel-header {
-        background-color: #f2f2f2;
-        border-bottom: 1px solid #c0c0c0;
-        padding: 4px 8px;
-        margin: -1rem -1rem 1rem -1rem;
-        font-weight: 500;
-        color: #333;
-        font-size: 14px;
-    }
-    div.stTabs [data-baseweb="tab-list"] {
-        background-color: #e5e5e5;
-        border-radius: 0;
-        gap: 1px;
-    }
-    div.stTabs [data-baseweb="tab"] {
-        background-color: #f2f2f2;
-        border: 1px solid #c0c0c0;
-        border-bottom: none;
-        padding: 4px 12px;
-        font-size: 13px;
-        color: #333;
-    }
-    div.stTabs [aria-selected="true"] {
-        background-color: white;
-        font-weight: bold;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-    
-    col_in, col_out = st.columns([1, 3.5])
+    # --- LAYOUT DEFINITION ---
+    # We use a standard side-by-side layout: Sidebar for inputs, Main column for vertical scrollable results.
+    col_in, col_out = st.columns([1, 2.8], gap="large")
     
     with col_in:
-        with st.container(border=True):
-            inputs, run_btn = collect_inputs(st)
+        inputs, run_btn = collect_inputs(st)
     
     if run_btn:
-        with st.spinner("Running..."):
+        with st.spinner("Running solver, please wait..."):
             sys = EpicyclicGearSystem(inputs)
             sys.run()
             st.session_state['res'] = sys.results
@@ -321,120 +288,119 @@ def main():
 
     res = st.session_state.get('res')
     if not res:
-        with col_out: st.info("Configure inputs on the left and click **RUN ANALYSIS**.")
+        with col_out: st.info("👈 Configure inputs on the left and click **RUN ANALYSIS**.")
         return
         
     with col_out:
-        # TOP PANEL: Numerical Results
-        with st.container(border=True):
-            st.markdown('<div class="panel-header">Numerical Results</div>', unsafe_allow_html=True)
-            c_text, c_tab = st.columns([1.2, 1.8])
-            with c_text:
-                active_count = int(np.sum(res['active_final']))
-                t = f"""
-Nominal transmitted force W [N] : {res['W_nominal_N']:.4f}  
-Maximum K_gamma [-] : {res['K_gamma_max']:.6f}  
-K_gamma span over phase [-] : {res['K_gamma_span']:.15f}  
-Worst phase angle [deg] : {np.rad2deg(res['worst_phase_rad']):.3f}  
-Sun settlement w [um] : {res['sun_displacement_final'][0]*1e6:.6f}  
-Sun tilt phi_x [mrad] : {res['sun_displacement_final'][1]*1e3:.6f}  
-Sun tilt phi_y [mrad] : {res['sun_displacement_final'][2]*1e3:.6f}  
-Maximum planet force [N] : {np.max(res['F_final_N']):.6f}  
-Active planets at worst phase : {active_count} / {res['N']}  
-Zero error override : {str(res.get('zero_error_override', False)).lower()}  
-Planet-1-only error override : {str(res.get('single_planet_error_override', False)).lower()}  
-Periodic eccentricity enabled : {str(res.get('periodic_ecc_enabled', False)).lower()}  
-Periodic stiffness enabled : {str(res.get('periodic_stiffness_enabled', False)).lower()}  
-                """
-                st.text(t)
-            with c_tab:
-                idx = res['worst_phase_index']
-                df = pd.DataFrame({
-                    'Planet': range(1, res['N']+1), 
-                    'Angle_deg': res['planet_angles_deg'],
-                    'Force_N': res['F_final_N'], 
-                    'Share_pct': 100*res['load_share_final'],
-                    'LSF': res['LSF_final'], 
-                    'Active': res['active_final'].astype(bool),
-                    'EqError_um': res['e_total_phase_m'][:, idx]*1e6
-                })
-                # Formatting table exactly like MATLAB
-                st.dataframe(df, use_container_width=True, hide_index=True)
-                
-        # MIDDLE PANELS: LSF | Schematic | Phase
-        c_lsf, c_sch, c_pha = st.columns([1, 1, 1.3])
-        
-        with c_lsf:
-            with st.container(border=True):
-                st.markdown('<div class="panel-header">Final LSF</div>', unsafe_allow_html=True)
-                t_lsf, t_err = st.tabs(["LSF", "Errors"])
-                with t_lsf: st.plotly_chart(plot_lsf_bar(res), use_container_width=True, config={'displayModeBar': False})
-                with t_err: st.plotly_chart(plot_error_components(res), use_container_width=True, config={'displayModeBar': False})
-                
-        with c_sch:
-            with st.container(border=True):
-                st.markdown('<div class="panel-header">System Schematic</div>', unsafe_allow_html=True)
-                st.plotly_chart(plot_schematic(res, st.session_state['inputs'].get('R_sun_mm', 50)), use_container_width=True, config={'displayModeBar': False})
-                
-                # Text below schematic
-                ecc_xy = res['ecc_xy_phase_m'][:, res['worst_phase_index']] * 1000
-                st.text(f"w = {res['sun_displacement_final'][0]*1e6:.2f} um\nphi_x = {res['sun_displacement_final'][1]*1e3:.3f} mrad\nphi_y = {res['sun_displacement_final'][2]*1e3:.3f} mrad\necc = [{ecc_xy[0]:.3f}, {ecc_xy[1]:.3f}] mm")
-                
-        with c_pha:
-            with st.container(border=True):
-                st.markdown('<div class="panel-header">Phase Response</div>', unsafe_allow_html=True)
-                t_kg, t_plsf, t_pf, t_pe = st.tabs(["K_gamma", "Planet LSF", "Planet Force", "Eq. Error"])
-                with t_kg: st.plotly_chart(plot_phase_kgamma(res), use_container_width=True, config={'displayModeBar': False})
-                with t_plsf: st.plotly_chart(plot_phase_planet(res, 'LSF_phase', "Individual Planet LSF vs Phase", "LSF [-]"), use_container_width=True, config={'displayModeBar': False})
-                with t_pf: st.plotly_chart(plot_phase_planet(res, 'force_phase_N', "Individual Planet Force vs Phase", "Force [N]"), use_container_width=True, config={'displayModeBar': False})
-                with t_pe: st.plotly_chart(plot_phase_planet(res, 'e_total_phase_m', "Equivalent Error vs Phase", "Error [um]"), use_container_width=True, config={'displayModeBar': False})
-                
-                phase_mode = st.session_state['inputs'].get('phase_plot_mode', 'Raw K_gamma')
-                st.text(f"Worst phase = {np.rad2deg(res['worst_phase_rad']):.2f} deg / {res['worst_phase_rad']:.3f} rad\nK_gamma max = {res['K_gamma_max']:.6f} | span = {res['K_gamma_span']:.5g}\nPlot mode = {phase_mode}")
-                
-        # BOTTOM PANEL: Sensitivity / Monte Carlo
-        with st.container(border=True):
-            st.markdown('<div class="panel-header">Sensitivity / Monte Carlo</div>', unsafe_allow_html=True)
-            t_mc, t_sens = st.tabs(["Monte Carlo / Trends", "Sensitivity"])
+        # --- TOP BANNER: NUMERICAL RESULTS ---
+        st.markdown("### Numerical Results")
+        st.markdown("---")
+        c_text, c_tab = st.columns([1, 1.5])
+        with c_text:
+            active_count = int(np.sum(res['active_final']))
+            st.code(f"""
+Nominal transmitted force W [N] : {res['W_nominal_N']:.4f}
+Maximum K_gamma [-]             : {res['K_gamma_max']:.6f}
+K_gamma span over phase [-]     : {res['K_gamma_span']:.6f}
+Worst phase angle [deg]         : {np.rad2deg(res['worst_phase_rad']):.3f}
+Sun settlement w [um]           : {res['sun_displacement_final'][0]*1e6:.6f}
+Sun tilt phi_x [mrad]           : {res['sun_displacement_final'][1]*1e3:.6f}
+Sun tilt phi_y [mrad]           : {res['sun_displacement_final'][2]*1e3:.6f}
+Maximum planet force [N]        : {np.max(res['F_final_N']):.6f}
+Active planets at worst phase   : {active_count} / {res['N']}
+            """)
+        with c_tab:
+            idx = res['worst_phase_index']
+            df = pd.DataFrame({
+                'Planet': range(1, res['N']+1), 
+                'Angle_deg': res['planet_angles_deg'],
+                'Force_N': res['F_final_N'], 
+                'Share_pct': 100*res['load_share_final'],
+                'LSF': res['LSF_final'], 
+                'Active': res['active_final'].astype(bool),
+                'EqError_um': res['e_total_phase_m'][:, idx]*1e6
+            })
+            st.dataframe(df, use_container_width=True, hide_index=True)
             
-            with t_mc:
-                mc1, mc2, mc3 = st.columns(3)
-                mc = res.get('monte_carlo')
-                has_mc = mc and 'nRuns' in mc
-                with mc1: 
-                    if has_mc: st.plotly_chart(plot_mc_hist(mc), use_container_width=True, config={'displayModeBar': False})
-                    else: st.plotly_chart(plot_mc_hist({'K_gamma_max_all': [res['K_gamma_max']]}), use_container_width=True, config={'displayModeBar': False}) # show single run if MC disabled
-                with mc2:
-                    if has_mc: st.plotly_chart(plot_mc_box(mc, res['N']), use_container_width=True, config={'displayModeBar': False})
-                    else: st.plotly_chart(plot_mc_box({'LSF_worst_all': res['LSF_final'].reshape(-1, 1)}, res['N']), use_container_width=True, config={'displayModeBar': False})
-                with mc3:
-                    ts, td = st.tabs(["Stiffness", "Deflection"])
-                    k_w = st.session_state['inputs'].get('k_support_w_Nm', 0)
-                    with ts: st.plotly_chart(plot_trend(res, k_w, True), use_container_width=True, config={'displayModeBar': False})
-                    with td: st.plotly_chart(plot_trend(res, k_w, False), use_container_width=True, config={'displayModeBar': False})
-                
-                # Bottom text bar
-                if has_mc:
-                    st.text(f"Monte Carlo enabled\nRuns: {mc['nRuns']}\nMean max K_gamma: {np.mean(mc['K_gamma_max_all']):.6f}\nStd max K_gamma: {np.std(mc['K_gamma_max_all']):.6f}")
-                else:
-                    st.text("Monte Carlo disabled")
-                    
-            with t_sens:
-                sens = res.get('sensitivity')
-                has_sens = sens is not None
-                if has_sens:
-                    s1, s2, s3 = st.columns(3)
-                    with s1: 
-                        st.plotly_chart(plot_sens(sens, 'eccentricity', "Eccentricity amplitude [um]", "Sensitivity: K_γ vs Eccentricity", "circle"), use_container_width=True, config={'displayModeBar': False})
-                        st.text("Shows how worst-case load sharing changes as\nperiodic eccentricity increases.\nA steeper rise means the system is more\nsensitive to rotating compatibility errors.")
-                    with s2: 
-                        st.plotly_chart(plot_sens(sens, 'mesh_scale', "Mesh scale factor [-]", "Sensitivity: K_γ vs Mesh Scale", "square"), use_container_width=True, config={'displayModeBar': False})
-                        st.text("Shows how worst-case load sharing changes when\noverall mesh stiffness is scaled.\nStrong variation means the result depends heavily\non tooth-mesh stiffness assumptions.")
-                    with s3: 
-                        st.plotly_chart(plot_sens(sens, 'bearing_scale', "Bearing scale factor [-]", "Sensitivity: K_γ vs Bearing Scale", "diamond"), use_container_width=True, config={'displayModeBar': False})
-                        st.text("Shows how worst-case load sharing changes with\nbearing/support stiffness.\nStrong sensitivity means support flexibility\nstrongly affects how the load redistributes.")
-                else:
-                    st.text("Sensitivity disabled. Enable in Advanced Effects to view.")
+        st.markdown("<br>", unsafe_allow_html=True)
+            
+        # --- ROW 1: LSF AND SCHEMATIC ---
+        r1_c1, r1_c2 = st.columns(2)
+        with r1_c1:
+            st.plotly_chart(plot_lsf_bar(res), use_container_width=True)
+            st.info("Final Load Sharing Factor representation across all planets at the worst-case phase angle.")
+        with r1_c2:
+            st.plotly_chart(plot_schematic(res, st.session_state['inputs'].get('R_sun_mm', 50)), use_container_width=True)
+            ecc_xy = res['ecc_xy_phase_m'][:, res['worst_phase_index']] * 1000
+            st.info(f"**Displacement:** w = {res['sun_displacement_final'][0]*1e6:.2f} um | phi_x = {res['sun_displacement_final'][1]*1e3:.3f} mrad | phi_y = {res['sun_displacement_final'][2]*1e3:.3f} mrad | ecc = [{ecc_xy[0]:.3f}, {ecc_xy[1]:.3f}] mm")
+
+        st.markdown("---")
+
+        # --- ROW 2: ERROR BREAKDOWN AND EQ ERROR ---
+        r2_c1, r2_c2 = st.columns(2)
+        with r2_c1:
+            st.plotly_chart(plot_error_components(res), use_container_width=True)
+            st.info("Breakdown of equivalent errors into their components (pin hole, runout, profile, etc.)")
+        with r2_c2:
+            st.plotly_chart(plot_phase_planet(res, 'e_total_phase_m', "Equivalent Error vs Phase", "Error [um]"), use_container_width=True)
+            st.info("Total effective compatibility error acting on each planet as the carrier rotates.")
+
+        st.markdown("---")
+
+        # --- ROW 3: PHASE RESPONSE ---
+        r3_c1, r3_c2 = st.columns(2)
+        with r3_c1:
+            # Dropdown attached specifically to K_gamma graph as requested
+            phase_mode = st.selectbox("Phase plot mode", ["Raw K_gamma", "Envelope", "Smoothed"], index=0)
+            st.plotly_chart(plot_phase_kgamma(res, mode=phase_mode), use_container_width=True)
+            st.info(f"Worst phase = {np.rad2deg(res['worst_phase_rad']):.2f} deg. Maximum load sharing penalty (K_gamma) across the full rotation cycle.")
+        with r3_c2:
+            st.plotly_chart(plot_phase_planet(res, 'LSF_phase', "Individual Planet LSF vs Phase", "LSF [-]"), use_container_width=True)
+            st.info("Dynamic shift in LSF for each individual planet gear.")
+
+        st.markdown("---")
+
+        # --- ROW 4: MONTE CARLO ---
+        st.markdown("### Monte Carlo & Trends")
+        mc = res.get('monte_carlo')
+        has_mc = mc and 'nRuns' in mc
+        
+        r4_c1, r4_c2, r4_c3 = st.columns(3)
+        with r4_c1:
+            if has_mc: st.plotly_chart(plot_mc_hist(mc), use_container_width=True)
+            else: st.plotly_chart(plot_mc_hist({'K_gamma_max_all': [res['K_gamma_max']]}), use_container_width=True)
+        with r4_c2:
+            if has_mc: st.plotly_chart(plot_mc_box(mc, res['N']), use_container_width=True)
+            else: st.plotly_chart(plot_mc_box({'LSF_worst_all': res['LSF_final'].reshape(-1, 1)}, res['N']), use_container_width=True)
+        with r4_c3:
+            k_w = st.session_state['inputs'].get('k_support_w_Nm', 0)
+            st.plotly_chart(plot_trend(res, k_w, True), use_container_width=True)
+
+        if has_mc:
+            st.success(f"**Monte Carlo Stats:** Runs: {mc['nRuns']} | Mean max K_gamma: {np.mean(mc['K_gamma_max_all']):.6f} | Std max K_gamma: {np.std(mc['K_gamma_max_all']):.6f}")
+        else:
+            st.warning("Monte Carlo disabled (Enable in Advanced Effects). Only showing single run data.")
+
+        st.markdown("---")
+
+        # --- ROW 5: SENSITIVITY ---
+        st.markdown("### Sensitivity Analysis")
+        sens = res.get('sensitivity')
+        has_sens = sens is not None
+        
+        if has_sens:
+            r5_c1, r5_c2, r5_c3 = st.columns(3)
+            with r5_c1:
+                st.plotly_chart(plot_sens(sens, 'eccentricity', "Eccentricity amplitude [um]", "Sensitivity: K_γ vs Eccentricity", "circle"), use_container_width=True)
+                st.info("Shows how worst-case load sharing changes as periodic eccentricity increases. A steeper rise means the system is highly sensitive to rotating errors.")
+            with r5_c2:
+                st.plotly_chart(plot_sens(sens, 'mesh_scale', "Mesh scale factor [-]", "Sensitivity: K_γ vs Mesh Scale", "square"), use_container_width=True)
+                st.info("Shows how worst-case load sharing changes when overall mesh stiffness is scaled.")
+            with r5_c3:
+                st.plotly_chart(plot_sens(sens, 'bearing_scale', "Bearing scale factor [-]", "Sensitivity: K_γ vs Bearing Scale", "diamond"), use_container_width=True)
+                st.info("Shows how worst-case load sharing changes with bearing/support stiffness.")
+        else:
+            st.warning("Sensitivity study disabled. Enable in Advanced Effects to view.")
 
 if __name__ == '__main__':
     main()
