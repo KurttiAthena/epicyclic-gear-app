@@ -280,10 +280,10 @@ def collect_inputs():
                     
                     inputs['enable_periodic_stiffness'] = st.checkbox("Enable periodic stiffness", False)
                     inputs['tvms_amp_scale'] = st.number_input("TVMS scale factor", value=1.0) if inputs['enable_periodic_stiffness'] else 0
-                with ae2:
+
                     inputs['enable_temperature_effects'] = st.checkbox("Enable thermal effects", False)
                     inputs['temperature_C'] = st.number_input("Operating temp [C]", value=20.0, disabled=not inputs['enable_temperature_effects'])
-                    
+                with ae2:
                     inputs['k_support_phi_NmRad'] = st.number_input("Tilt support k_phi [Nm/rad]", value=10000.0)
                     inputs['k_support_w_Nm'] = st.number_input("Settlement support k_w [N/m]", value=0.0)
                     
