@@ -273,8 +273,9 @@ def collect_inputs():
             if show_adv:
                 ae1, ae2 = st.columns(2)
                 with ae1:
-                    inputs['error_preset'] = st.selectbox("Error level", ['fine', 'medium', 'coarse'], index=1)
                     inputs['zero_error_override'] = st.checkbox("Zero error override", False)
+                    inputs['error_preset'] = st.selectbox("Error level", ['fine', 'medium', 'coarse'], index=1, disabled=inputs['zero_error_override'])
+                    
                     sp = st.checkbox("Error on planet 1 only", False)
                     inputs['single_planet_error_override'] = sp
                     inputs['single_planet_error_um'] = st.number_input("Single planet error [um]", value=0.0, disabled=not sp)
@@ -284,31 +285,68 @@ def collect_inputs():
                     elvl = st.selectbox("Excitation level", ['Low', 'Medium', 'High'], index=1, disabled=not pe)
                     inputs['ecc_amp_um'] = {'low':5, 'medium':10, 'high':20}[elvl.lower()] if pe else 0
                     
-                    ps = st.checkbox("Enable periodic stiffness", False)
-                    inputs['enable_periodic_stiffness'] = ps
-                    inputs['tvms_amp_scale'] = st.number_input("TVMS scale factor", value=1.0, disabled=not ps)
+                    # Replacing TVMS with Stiffness Scale Factors side-by-side
+                    st.markdown("**Stiffness Multipliers**")
+                    ps = st.checkbox("Modify stiffness scales", False)
+                    s_c1, s_c2 = st.columns(2)
+                    with s_c1:
+                        inputs['mesh_scale_factor'] = st.number_input("Mesh scale", value=1.0, disabled=not ps)
+                    with s_c2:
+                        inputs['bearing_scale_factor'] = st.number_input("Bearing scale", value=1.0, disabled=not ps)
                     
                 with ae2:
                     inputs['enable_temperature_effects'] = st.checkbox("Enable thermal effects", False)
                     inputs['temperature_C'] = st.number_input("Operating temp [C]", value=20.0, disabled=not inputs['enable_temperature_effects'])
                     
-                    ts = st.checkbox("Enable tilt support", False)
-                    val_k_phi = st.number_input("Tilt support k_phi [Nm/rad]", value=10000.0, disabled=not ts)
-                    inputs['k_support_phi_NmRad'] = val_k_phi if ts else 0.0
+                    # Combined Tilt & Settlement Support
+                    ts = st.checkbox("Enable tilt & settlement support", False)
                     
-                    inputs['k_support_w_Nm'] = st.number_input("Settlement support k_w [N/m]", value=0.0)
+                    tilt_opts = {'1e3': 1e3, '1e4': 1e4, '1e5': 1e5, '1e6': 1e6}
+                    tilt_choice = st.selectbox("Tilt support k_phi [Nm/rad]", list(tilt_opts.keys()), index=1, disabled=not ts)
+                    inputs['k_support_phi_NmRad'] = tilt_opts[tilt_choice] if ts else 0.0
+                    
+                    settle_opts = {'1e4': 1e4, '1e6': 1e6, '1e8': 1e8}
+                    settle_choice = st.selectbox("Settlement support k_w [N/m]", list(settle_opts.keys()), index=2, disabled=not ts)
+                    inputs['k_support_w_Nm'] = settle_opts[settle_choice] if ts else 0.0
                     
                     inputs['phase_steps'] = int(st.number_input("Phase steps", value=181))
                     inputs['seed'] = int(st.number_input("Seed", value=42))
                     inputs['run_sensitivity'] = st.checkbox("Run sensitivity study", False)
                     inputs['run_monte_carlo'] = st.checkbox("Run Monte Carlo", False)
+
             else:
-                inputs.update(dict(error_preset='medium', zero_error_override=False, single_planet_error_override=False, single_planet_error_um=0.0, enable_periodic_ecc=False, ecc_amp_um=0, enable_periodic_stiffness=False, tvms_amp_scale=0, enable_temperature_effects=False, temperature_C=20.0, k_support_phi_NmRad=0.0, k_support_w_Nm=0.0, phase_steps=181, seed=42, run_sensitivity=False, run_monte_carlo=False))
+                inputs.update(dict(
+                    error_preset='medium', zero_error_override=False, 
+                    single_planet_error_override=False, single_planet_error_um=0.0, 
+                    enable_periodic_ecc=False, ecc_amp_um=0, 
+                    mesh_scale_factor=1.0, bearing_scale_factor=1.0, 
+                    enable_temperature_effects=False, temperature_C=20.0, 
+                    k_support_phi_NmRad=0.0, k_support_w_Nm=0.0, 
+                    phase_steps=181, seed=42, run_sensitivity=False, run_monte_carlo=False
+                ))
                 
         # Hidden hardcoded constants needed for solver
-        inputs.update(dict(temperature_ref_C=20, enable_thermal_geometry_error=inputs['enable_temperature_effects'], use_auto_thermal_gradient=True, thermal_gradient_ratio=0.1, thermal_gradient_C=0, thermal_hotspot_deg=0, thermal_pin_weight=1.0, thermal_planet_weight=0.7, r_support_mm=inputs['R_sun_mm'], mesh_scale_factor=1.0, bearing_scale_factor=1.0, ecc_phase_deg=0, ecc_order=1, tvms_order=1, tvms_planet_phase_scale=1.0, monte_carlo_base_seed=inputs['seed'], sensitivity_seed=inputs['seed'], nMonteCarlo=50, sensitivity_ecc_values_um=[0,5,10,20,35,50,75,100], sensitivity_mesh_scale_values=[0.05,0.1,0.25,1.0,5.0,10.0,20.0], sensitivity_bearing_scale_values=[0.01,0.05,0.1,1.0,10.0,50.0,100.0]))
-        if inputs['zero_error_override']: inputs['tol_override'] = dict(pin_rad_um=0, pin_tan_um=0, runout_um=0, profile_um=0, commonProfile_um=0, commonXY_um=0)
-        if inputs['single_planet_error_override']: inputs['zero_error_override'], inputs['tol_override'] = False, dict(pin_rad_um=0, pin_tan_um=0, runout_um=0, profile_um=0, commonProfile_um=0, commonXY_um=0)
+        inputs.update(dict(
+            temperature_ref_C=20, 
+            enable_thermal_geometry_error=inputs.get('enable_temperature_effects', False), 
+            use_auto_thermal_gradient=True, thermal_gradient_ratio=0.1, 
+            thermal_gradient_C=0, thermal_hotspot_deg=0, 
+            thermal_pin_weight=1.0, thermal_planet_weight=0.7, 
+            r_support_mm=inputs.get('R_sun_mm', 50.0), 
+            ecc_phase_deg=0, ecc_order=1, 
+            enable_periodic_stiffness=False, tvms_amp_scale=0.0, tvms_order=1, tvms_planet_phase_scale=1.0, 
+            monte_carlo_base_seed=inputs.get('seed', 42), sensitivity_seed=inputs.get('seed', 42), nMonteCarlo=50, 
+            sensitivity_ecc_values_um=[0,5,10,20,35,50,75,100], 
+            sensitivity_mesh_scale_values=[0.05,0.1,0.25,1.0,5.0,10.0,20.0], 
+            sensitivity_bearing_scale_values=[0.01,0.05,0.1,1.0,10.0,50.0,100.0]
+        ))
+
+        if inputs['zero_error_override']: 
+            inputs['tol_override'] = dict(pin_rad_um=0, pin_tan_um=0, runout_um=0, profile_um=0, commonProfile_um=0, commonXY_um=0)
+        if inputs['single_planet_error_override']: 
+            inputs['zero_error_override'] = False
+            inputs['tol_override'] = dict(pin_rad_um=0, pin_tan_um=0, runout_um=0, profile_um=0, commonProfile_um=0, commonXY_um=0)
+            
         st.markdown("---")
         run_btn = st.button("▶ RUN ANALYSIS", type="primary", use_container_width=True)
     return inputs, run_btn
@@ -339,6 +377,9 @@ def main():
     </style>
     """, unsafe_allow_html=True)
     
+    st.title("Epicyclic Gear System Analysis")
+    st.markdown("Advanced analytical solver for calculating load sharing, static errors, and phase response.")
+  
     # 1. User Inputs at the top
     inputs, run_btn = collect_inputs()
     
