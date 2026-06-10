@@ -280,19 +280,26 @@ def collect_inputs():
                     inputs['single_planet_error_override'] = sp
                     inputs['single_planet_error_um'] = st.number_input("Single planet error [um]", value=0.0, disabled=not sp)
                     
+                    # 1. Periodic Eccentricity
                     pe = st.checkbox("Enable periodic eccentricity", False)
                     inputs['enable_periodic_ecc'] = pe
-                    elvl = st.selectbox("Excitation level", ['Low', 'Medium', 'High'], index=1, disabled=not pe)
-                    inputs['ecc_amp_um'] = {'low':5, 'medium':10, 'high':20}[elvl.lower()] if pe else 0
+                    elvl = st.selectbox("Excitation level", ['Low (5 µm)', 'Medium (10 µm)', 'High (20 µm)'], index=1, disabled=not pe)
+                    inputs['ecc_amp_um'] = {'low (5 µm)': 5, 'medium (10 µm)': 10, 'high (20 µm)': 20}[elvl.lower()] if pe else 0
                     
-                    # Replacing TVMS with Stiffness Scale Factors side-by-side
+                    # 2. TVMS (Harmonics)
+                    ps = st.checkbox("Enable TVMS (Harmonics)", False)
+                    inputs['enable_periodic_stiffness'] = ps
+                    inputs['tvms_amp_scale'] = 1.0 if ps else 0.0
+                    inputs['tvms_order'] = st.selectbox("TVMS Harmonic Order", [1, 2, 3], index=0, disabled=not ps)
+
+                    # 3. Overall Stiffness Multipliers
                     st.markdown("**Stiffness Multipliers**")
-                    ps = st.checkbox("Modify stiffness scales", False)
+                    mod_stiff = st.checkbox("Modify stiffness scales", False)
                     s_c1, s_c2 = st.columns(2)
                     with s_c1:
-                        inputs['mesh_scale_factor'] = st.number_input("Mesh scale", value=1.0, disabled=not ps)
+                        inputs['mesh_scale_factor'] = st.number_input("Mesh scale", value=1.0, disabled=not mod_stiff)
                     with s_c2:
-                        inputs['bearing_scale_factor'] = st.number_input("Bearing scale", value=1.0, disabled=not ps)
+                        inputs['bearing_scale_factor'] = st.number_input("Bearing scale", value=1.0, disabled=not mod_stiff)
                     
                 with ae2:
                     inputs['enable_temperature_effects'] = st.checkbox("Enable thermal effects", False)
@@ -319,6 +326,7 @@ def collect_inputs():
                     error_preset='medium', zero_error_override=False, 
                     single_planet_error_override=False, single_planet_error_um=0.0, 
                     enable_periodic_ecc=False, ecc_amp_um=0, 
+                    enable_periodic_stiffness=False, tvms_amp_scale=0.0, tvms_order=1,
                     mesh_scale_factor=1.0, bearing_scale_factor=1.0, 
                     enable_temperature_effects=False, temperature_C=20.0, 
                     k_support_phi_NmRad=0.0, k_support_w_Nm=0.0, 
@@ -334,7 +342,10 @@ def collect_inputs():
             thermal_pin_weight=1.0, thermal_planet_weight=0.7, 
             r_support_mm=inputs.get('R_sun_mm', 50.0), 
             ecc_phase_deg=0, ecc_order=1, 
-            enable_periodic_stiffness=False, tvms_amp_scale=0.0, tvms_order=1, tvms_planet_phase_scale=1.0, 
+            enable_periodic_stiffness=inputs.get('enable_periodic_stiffness', False), 
+            tvms_amp_scale=inputs.get('tvms_amp_scale', 0.0), 
+            tvms_order=inputs.get('tvms_order', 1), 
+            tvms_planet_phase_scale=1.0, 
             monte_carlo_base_seed=inputs.get('seed', 42), sensitivity_seed=inputs.get('seed', 42), nMonteCarlo=50, 
             sensitivity_ecc_values_um=[0,5,10,20,35,50,75,100], 
             sensitivity_mesh_scale_values=[0.05,0.1,0.25,1.0,5.0,10.0,20.0], 
