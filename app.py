@@ -46,7 +46,7 @@ def _auto_y_range(y_data: np.ndarray, pad_frac: float = 0.15):
     if len(y_clean) == 0: return None
     y_min, y_max = float(np.min(y_clean)), float(np.max(y_clean))
     span = y_max - y_min
-    if span < 1e-12: pad = max(1e-6, 0.02 * max(abs(y_min), 1))
+    if span < 1e-4: pad = max(1e-4, 0.02 * max(abs(y_min), 1))
     else: pad = pad_frac * span
     return [y_min - pad, y_max + pad]
 
