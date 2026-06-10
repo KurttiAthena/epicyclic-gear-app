@@ -135,6 +135,26 @@ def plot_schematic(res: dict, R_sun_mm: float) -> go.Figure:
     if tilt_norm > 1e-15:
         tilt_len = 0.9 * R_sun_mm
         fig.add_annotation(x=tilt_len*phi_x/tilt_norm, y=tilt_len*phi_y/tilt_norm, ax=0, ay=0, xref="x", yref="y", axref="x", ayref="y", showarrow=True, arrowhead=2, arrowsize=1.5, arrowcolor="blue", arrowwidth=2)
+
+        # Eccentricity (Exaggerated dynamically for qualitative visibility)
+    if 'ecc_xy_phase_m' in res and 'K_gamma_phase' in res:
+        # Get the eccentricity at the worst-case phase angle
+        idx = np.argmax(res['K_gamma_phase'])
+        ex_mm = res['ecc_xy_phase_m'][0, idx] * 1000
+        ey_mm = res['ecc_xy_phase_m'][1, idx] * 1000
+        ecc_norm = math.sqrt(ex_mm**2 + ey_mm**2)
+        
+        if ecc_norm > 1e-6:
+            # Artificially exaggerate the microscopic shift so it's visible on the plot
+            scale_factor = (0.15 * R_sun_mm) / ecc_norm
+            ex_plot = ex_mm * scale_factor
+            ey_plot = ey_mm * scale_factor
+            
+            # Draw green dashed circle for the eccentric sun gear
+            fig.add_trace(go.Scatter(x=ex_plot + R_sun_mm * np.cos(th), y=ey_plot + R_sun_mm * np.sin(th), mode='lines', line=dict(color='#229954', width=2, dash='dash'), name='Eccentric Sun', showlegend=False))
+            
+            # Draw green arrow pointing from true center to eccentric center
+            fig.add_annotation(x=ex_plot, y=ey_plot, ax=0, ay=0, xref="x", yref="y", axref="x", ayref="y", showarrow=True, arrowhead=2, arrowsize=1.5, arrowcolor="#229954", arrowwidth=2)
     
     _fig_layout(fig, "System Schematic (qualitative)", "X [mm]", "Y [mm]")
     fig.update_yaxes(scaleanchor="x", scaleratio=1)
