@@ -486,13 +486,13 @@ def main():
         r7_c1, r7_c2, r7_c3 = st.columns(3)
         with r7_c1:
             with st.container(border=True):
-                st.plotly_chart(plot_sens(sens, 'eccentricity', "Eccentricity amplitude [um]", "Sensitivity: K_γ vs Eccentricity", "circle"), use_container_width=True)
+                st.plotly_chart(plot_sens(sens, 'eccentricity', "Eccentricity amplitude [um]", "K_γ vs Eccentricity", "circle"), use_container_width=True)
         with r7_c2:
             with st.container(border=True):
-                st.plotly_chart(plot_sens(sens, 'mesh_scale', "Mesh scale factor [-]", "Sensitivity: K_γ vs Mesh Scale", "square"), use_container_width=True)
+                st.plotly_chart(plot_sens(sens, 'mesh_scale', "Mesh scale factor [-]", "K_γ vs Mesh Scale", "square"), use_container_width=True)
         with r7_c3:
             with st.container(border=True):
-                st.plotly_chart(plot_sens(sens, 'bearing_scale', "Bearing scale factor [-]", "Sensitivity: K_γ vs Bearing Scale", "diamond"), use_container_width=True)
+                st.plotly_chart(plot_sens(sens, 'bearing_scale', "Bearing scale factor [-]", "K_γ vs Bearing Scale", "diamond"), use_container_width=True)
     else:
         st.warning("Sensitivity study disabled. Enable in Advanced Effects to view.")
 
