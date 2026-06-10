@@ -1104,19 +1104,16 @@ def solve_single_case(params: dict) -> dict:
     # Find worst phase using system load-sharing factor
     idx_worst = int(np.argmax(hist['K_gamma_phase']))
     K_gamma_max = hist['K_gamma_phase'][idx_worst]
-
+    
     # Pack output structure
     single = dict(
         N=params['N'],
         phase_rad=hist['phase_rad'],
         worst_phase_index=idx_worst,
         worst_phase_rad=hist['phase_rad'][idx_worst],
+      
+        # Phase-resolved data
         W_nominal_N=hist['W_nominal_N'],
-
-        # Full histories over one phase
-        force_phase_N=hist['force_phase_N'],
-        load_share_phase=hist['load_share_phase'],
-        LSF_phase=hist['LSF_phase'],
         K_gamma_phase=hist['K_gamma_phase'],
         sun_q_phase=hist['sun_q_phase'],
         active_phase=hist['active_phase'],
@@ -1126,6 +1123,9 @@ def solve_single_case(params: dict) -> dict:
         krp_phase_Nm=hist['krp_phase_Nm'],
         keff_phase_Nm=hist['keff_phase_Nm'],
         ecc_xy_phase_m=hist['ecc_xy_phase_m'],
+        force_phase_N=hist['force_phase_N'],
+        load_share_phase=hist['load_share_phase'],
+        LSF_phase=hist['LSF_phase'],
 
         # Final / worst-phase values
         F_final_N=hist['force_phase_N'][:, idx_worst],
