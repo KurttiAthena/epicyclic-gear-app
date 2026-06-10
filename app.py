@@ -279,9 +279,11 @@ def collect_inputs():
                     inputs['single_planet_error_override'] = sp
                     inputs['single_planet_error_um'] = st.number_input("Single planet error [um]", value=0.0, disabled=not sp)
                     
-                    inputs['enable_periodic_ecc'] = st.checkbox("Enable periodic eccentricity", False)
-                    elvl = st.selectbox("Excitation level", ['Low', 'Medium', 'High'], index=1)
-                    inputs['ecc_amp_um'] = {'low':5, 'medium':10, 'high':20}[elvl.lower()] if inputs['enable_periodic_ecc'] else 0
+                    pe = st.checkbox("Enable periodic eccentricity", False)
+                    inputs['enable_periodic_ecc'] = pe
+                    elvl = st.selectbox("Excitation level", ['Low', 'Medium', 'High'], index=1, disabled=not pe)
+                    inputs['ecc_amp_um'] = {'low':5, 'medium':10, 'high':20}[elvl.lower()] if pe else 0
+                    
                     ps = st.checkbox("Enable periodic stiffness", False)
                     inputs['enable_periodic_stiffness'] = ps
                     inputs['tvms_amp_scale'] = st.number_input("TVMS scale factor", value=1.0, disabled=not ps)
@@ -289,7 +291,11 @@ def collect_inputs():
                 with ae2:
                     inputs['enable_temperature_effects'] = st.checkbox("Enable thermal effects", False)
                     inputs['temperature_C'] = st.number_input("Operating temp [C]", value=20.0, disabled=not inputs['enable_temperature_effects'])
-                    inputs['k_support_phi_NmRad'] = st.number_input("Tilt support k_phi [Nm/rad]", value=10000.0)
+                    
+                    ts = st.checkbox("Enable tilt support", False)
+                    val_k_phi = st.number_input("Tilt support k_phi [Nm/rad]", value=10000.0, disabled=not ts)
+                    inputs['k_support_phi_NmRad'] = val_k_phi if ts else 0.0
+                    
                     inputs['k_support_w_Nm'] = st.number_input("Settlement support k_w [N/m]", value=0.0)
                     
                     inputs['phase_steps'] = int(st.number_input("Phase steps", value=181))
