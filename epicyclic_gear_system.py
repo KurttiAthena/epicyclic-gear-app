@@ -1212,7 +1212,7 @@ def run_sensitivity_sweeps(params: dict) -> dict:
     ecc_metrics = []
     for val in ecc_vals:
         p = copy.deepcopy(p_base)
-        p['ecc_amp_um'] = val
+        p['ecc_amp_um'] = True
         out = solve_single_case(p)
         ecc_metrics.append(extract_sweep_metrics(out))
 
