@@ -181,10 +181,17 @@ def plot_phase_planet(res: dict, key: str, title: str, ylabel: str) -> go.Figure
     _fig_layout(fig, title, "Phase angle [deg / rad]", ylabel, yaxis_range=_auto_y_range(data.flatten()))
     fig.update_xaxes(range=[0, 360], **_PHASE_TICKS)
     return fig
-
+  
 def plot_mc_hist(mc: dict) -> go.Figure:
-    fig = go.Figure(data=[go.Histogram(x=mc['K_gamma_max_all'], nbinsx=16, marker_color="#4285F4", marker_line=dict(color="white", width=1))])
-    return _fig_layout(fig, "Monte Carlo: K_γ,max distribution", "K_γ,max [-]", "Count")
+    # Changed nbinsx from 16 to 25 for more detailed bars
+    fig = go.Figure(data=[go.Histogram(x=mc['K_gamma_max_all'], nbinsx=25, marker_color="#4285F4", marker_line=dict(color="white", width=1))])
+    fig = _fig_layout(fig, "Monte Carlo: K_γ,max distribution", "K_γ,max [-]", "Count")
+    
+    # Force Plotly to draw a lot more ticks (e.g., ~15 ticks) on the X axis
+    fig.update_xaxes(nticks=15)
+    
+    return fig
+
 
 def plot_mc_box(mc: dict, N: int) -> go.Figure:
     fig = go.Figure()
@@ -537,7 +544,11 @@ def main():
         r7_c1, r7_c2, r7_c3 = st.columns(3)
         with r7_c1:
             with st.container(border=True):
-                st.plotly_chart(plot_sens(sens, 'eccentricity', "Eccentricity amplitude [um]", "K_γ vs Eccentricity", "circle"), use_container_width=True)
+                # Check if BOTH eccentricity and support stiffness are enabled
+                if inputs.get('enable_periodic_ecc', False) and inputs.get('k_support_w_Nm', 0) > 0:
+                    st.plotly_chart(plot_sens(sens, 'eccentricity', "Eccentricity amplitude [um]", "K_γ vs Eccentricity", "circle"), use_container_width=True)
+                else:
+                    st.warning("Eccentricity graph hidden: Eccentricity Effects and Settlement Support must be enabled to view this data.")
         with r7_c2:
             with st.container(border=True):
                 st.plotly_chart(plot_sens(sens, 'mesh_scale', "Mesh scale factor [-]", "K_γ vs Mesh Scale", "square"), use_container_width=True)
