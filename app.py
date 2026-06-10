@@ -394,9 +394,17 @@ def main():
     }
     </style>
     """, unsafe_allow_html=True)
+
+        # Create two columns, the second one being 4 times larger than the first
+    title_col1, title_col2 = st.columns([1, 4])
     
-    st.title("Epicyclic Gear System App")
-    st.markdown("Numerical modelling and simulation tool for load-sharing behaviour of planetary gears.")
+    with title_col1:
+        # Putting it in a column naturally restricts its size!
+        st.image("GIF_Epicyclic_Gearing.gif", use_container_width=True)
+        
+    with title_col2:
+        st.title("Epicyclic Gear System App")
+        st.markdown("Numerical modelling and simulation tool for load-sharing behaviour of planetary gears.")
   
     # 1. User Inputs at the top
     inputs, run_btn = collect_inputs()
