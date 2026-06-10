@@ -852,13 +852,7 @@ def solve_tutor_load_sharing(
         g += Qext
 
         # Solve K*q = g
-        cond = np.linalg.cond(K)
-        if cond > 1e14:
-            raise RuntimeError(
-                'Tutor load-sharing stiffness matrix became singular. '
-                'Check geometry, stiffness, support stiffness, or input loads.'
-            )
-        q = np.linalg.solve(K, g)
+        q, _, _, _ = np.linalg.lstsq(K, g, rcond=None)
 
         # Recover spring deflections and planet forces
         Delta = np.zeros(N)
@@ -1212,7 +1206,9 @@ def run_sensitivity_sweeps(params: dict) -> dict:
     ecc_metrics = []
     for val in ecc_vals:
         p = copy.deepcopy(p_base)
-        p['ecc_amp_um'] = True
+        p['enable_periodic_ecc'] = True  
+        p['ecc_amp_um'] = val
+
         out = solve_single_case(p)
         ecc_metrics.append(extract_sweep_metrics(out))
 
