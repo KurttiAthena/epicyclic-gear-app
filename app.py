@@ -395,16 +395,19 @@ def main():
     </style>
     """, unsafe_allow_html=True)
 
-        # Create two columns, the second one being 4 times larger than the first
-    title_col1, title_col2 = st.columns([1, 4])
-    
-    with title_col1:
-        # Putting it in a column naturally restricts its size!
+    # 1. Center the GIF using three columns. 
+    # By making the outer columns twice as big [2, 1, 2], the GIF stays small and centered!
+    spacer_left, img_col, spacer_right = st.columns([2, 1, 2])
+    with img_col:
         st.image("GIF_Epicyclic_Gearing.gif", use_container_width=True)
         
-    with title_col2:
-        st.title("Epicyclic Gear System App")
-        st.markdown("Numerical modelling and simulation tool for load-sharing behaviour of planetary gears.")
+    # 2. Center the Title and Subtitle using standard HTML formatting
+    st.markdown("<h1 style='text-align: center;'>Epicyclic Gear System App</h1>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center;'>Numerical modelling and simulation tool for load-sharing behaviour of planetary gears.</p>", unsafe_allow_html=True)
+    
+    # Optional: Adds a tiny bit of space before the user inputs start
+    st.markdown("<br>", unsafe_allow_html=True) 
+
   
     # 1. User Inputs at the top
     inputs, run_btn = collect_inputs()
