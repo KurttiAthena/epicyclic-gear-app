@@ -388,8 +388,8 @@ def main():
     </style>
     """, unsafe_allow_html=True)
     
-    st.title("Planetary Gear System App")
-    st.markdown("Numerical modelling and simulation tool for load-sharing behaviour of epicyclic gears.")
+    st.title("Epicyclic Gear System App")
+    st.markdown("Numerical modelling and simulation tool for load-sharing behaviour of planetary gears.")
   
     # 1. User Inputs at the top
     inputs, run_btn = collect_inputs()
