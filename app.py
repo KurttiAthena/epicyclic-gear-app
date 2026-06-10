@@ -192,7 +192,6 @@ def plot_mc_hist(mc: dict) -> go.Figure:
     
     return fig
 
-
 def plot_mc_box(mc: dict, N: int) -> go.Figure:
     fig = go.Figure()
     for i in range(N):
@@ -208,14 +207,22 @@ def plot_trend(res: dict, k_w: float, is_stiff: bool) -> go.Figure:
     N_rng = np.arange(3, max(8, N_cur + 3) + 1)
     K = (k_w + N_rng * k_eff_mean)
     K_cur = (k_w + N_cur * k_eff_mean)
+    
     if is_stiff:
         y, y_cur, ylab, tit = K / 1e6, K_cur / 1e6, "Nominal settlement stiffness [MN/m]", "Nominal stiffness trend vs number of planets"
     else:
         y, y_cur, ylab, tit = (res['W_nominal_N'] / np.maximum(K, 1e-9))*1e6, (res['W_nominal_N'] / max(K_cur, 1e-9))*1e6, "Nominal deflection [μm]", "Nominal deflection trend vs number of planets"
+        
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=N_rng, y=y, mode='lines+markers', marker=dict(size=7, color="#2e86c1"), showlegend=False))
     fig.add_trace(go.Scatter(x=[N_cur], y=[y_cur], mode='markers', marker=dict(size=12, color="red"), name=f"Current run: N={N_cur}"))
-    return _fig_layout(fig, tit, "Number of planets", ylab)
+    
+    fig = _fig_layout(fig, tit, "Number of planets", ylab)
+    
+    # ADDED THIS LINE: Forces the X-axis to only show integer steps (1 by 1)
+    fig.update_xaxes(dtick=1)
+    
+    return fig
 
 def plot_sens(sens: dict, key: str, xlab: str, tit: str, sym: str) -> go.Figure:
     if not sens or key not in sens: return go.Figure().add_annotation(text="Disabled", showarrow=False)
