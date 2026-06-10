@@ -388,8 +388,8 @@ def main():
     </style>
     """, unsafe_allow_html=True)
     
-    st.title("Epicyclic Gear System Analysis")
-    st.markdown("Advanced analytical solver for calculating load sharing, static errors, and phase response.")
+    st.title("Planetary Gear System App")
+    st.markdown("Numerical modelling and simulation tool for load-sharing behaviour of epicyclic gears.")
   
     # 1. User Inputs at the top
     inputs, run_btn = collect_inputs()
