@@ -503,20 +503,19 @@ def main():
     has_mc = mc and 'nRuns' in mc
     
     st.markdown("### Monte Carlo Analysis")
-    r5_c1, r5_c2 = st.columns(2)
-    with r5_c1:
-        with st.container(border=True):
-            if has_mc: st.plotly_chart(plot_mc_hist(mc), use_container_width=True)
-            else: st.plotly_chart(plot_mc_hist({'K_gamma_max_all': [res['K_gamma_max']]}), use_container_width=True)
-    with r5_c2:
-        with st.container(border=True):
-            if has_mc: st.plotly_chart(plot_mc_box(mc, res['N']), use_container_width=True)
-            else: st.plotly_chart(plot_mc_box({'LSF_worst_all': res['LSF_final'].reshape(-1, 1)}, res['N']), use_container_width=True)
-            
+    
     if has_mc:
+        r5_c1, r5_c2 = st.columns(2)
+        with r5_c1:
+            with st.container(border=True):
+                st.plotly_chart(plot_mc_hist(mc), use_container_width=True)
+        with r5_c2:
+            with st.container(border=True):
+                st.plotly_chart(plot_mc_box(mc, res['N']), use_container_width=True)
+                
         st.success(f"**Monte Carlo Stats:** Runs: {mc['nRuns']} | Mean max K_gamma: {np.mean(mc['K_gamma_max_all']):.6f} | Std max K_gamma: {np.std(mc['K_gamma_max_all']):.6f}")
     else:
-        st.warning("Monte Carlo disabled (Enable in Advanced Effects). Only showing single run data.")
+        st.warning("Monte Carlo disabled (Enable in Advanced Effects).")
 
     # 8. TRENDS
     st.markdown("### Structural Trends")
