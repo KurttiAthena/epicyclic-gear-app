@@ -497,7 +497,7 @@ def main():
             st.plotly_chart(plot_schematic(res, st.session_state['inputs'].get('R_sun_mm', 50)), use_container_width=True)
             ecc_xy = res['ecc_xy_phase_m'][:, res['worst_phase_index']] * 1000
             st.info(f"**Displacement:** w = {res['sun_displacement_final'][0]*1e6:.2f} um | phi_x = {res['sun_displacement_final'][1]*1e3:.3f} mrad | phi_y = {res['sun_displacement_final'][2]*1e3:.3f} mrad | ecc = [{ecc_xy[0]:.3f}, {ecc_xy[1]:.3f}] mm")
-            st.info("**Color Convention:** Red = Sun gear | Gray circles = Planets | Blue arrow = Tilt direction")
+            st.info("**Color Convention:** Red = Sun gear | Gray circles = Planets | Blue arrow = Tilt direction | Green dashed cirlce = Eccentricity")
 
     # 4. ROW 2: ERROR BREAKDOWN AND EQ ERROR
     r2_c1, r2_c2 = st.columns(2)
