@@ -561,8 +561,6 @@ def main():
         with st.container(border=True):
             phase_mode = st.selectbox("Phase plot mode", ["Raw K_gamma", "Normalized K_gamma", "Delta from mean", "Percent variation"], index=0)
             st.plotly_chart(plot_phase_kgamma(res, mode=phase_mode), use_container_width=True)
-
-    st.plotly_chart(plot_polar_forces(res), use_container_width=True)
   
     with r3_c2:
         with st.container(border=True):
@@ -589,6 +587,11 @@ def main():
     with r4_c2:
         with st.container(border=True):
             st.plotly_chart(plot_phase_planet(res, 'force_phase_N', "Individual Planet Force vs Phase", "Force [N]"), use_container_width=True)
+
+   r8_c1 = st.columns(1)
+   with r8_c1:
+        with st.container(border=True):
+            st.plotly_chart(plot_polar_forces(res), use_container_width=True)
 
 
     # 7. MONTE CARLO & TRENDS
