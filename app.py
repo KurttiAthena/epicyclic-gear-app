@@ -202,6 +202,43 @@ def plot_phase_planet(res: dict, key: str, title: str, ylabel: str) -> go.Figure
     fig.update_xaxes(range=[0, 360], **_PHASE_TICKS)
     return fig
   
+def plot_polar_forces(res: dict) -> go.Figure:
+    fig = go.Figure()
+    phase_deg = np.rad2deg(res['phase_rad'])
+    colors = px.colors.qualitative.D3
+    
+    # Draw a perfect dashed circle representing what the force SHOULD be (Nominal)
+    nom_force = res['W_nominal_N']
+    fig.add_trace(go.Scatterpolar(
+        r=[nom_force]*len(phase_deg),
+        theta=phase_deg,
+        mode='lines',
+        line=dict(color='black', dash='dash', width=1.5),
+        name='Nominal Force'
+    ))
+    
+    # Draw the actual fluctuating force for each planet
+    for i in range(res['N']):
+        fig.add_trace(go.Scatterpolar(
+            r=res['force_phase_N'][i, :],
+            theta=phase_deg,
+            mode='lines',
+            line=dict(width=2, color=colors[i % len(colors)]),
+            name=f"Planet {i+1}"
+        ))
+        
+    fig.update_layout(
+        title=dict(text="Polar Force Distribution vs Carrier Phase", font=dict(size=14)),
+        polar=dict(
+            radialaxis=dict(visible=True, title="Force [N]"),
+            angularaxis=dict(direction="clockwise", rotation=90) # 0 degrees at the top
+        ),
+        showlegend=True,
+        margin=dict(l=30, r=30, t=40, b=30)
+    )
+    return fig
+
+  
 def plot_mc_hist(mc: dict) -> go.Figure:
     # Changed nbinsx from 16 to 25 for more detailed bars
     fig = go.Figure(data=[go.Histogram(x=mc['K_gamma_max_all'], nbinsx=25, marker_color="#4285F4", marker_line=dict(color="white", width=1))])
@@ -515,7 +552,9 @@ def main():
         with st.container(border=True):
             phase_mode = st.selectbox("Phase plot mode", ["Raw K_gamma", "Normalized K_gamma", "Delta from mean", "Percent variation"], index=0)
             st.plotly_chart(plot_phase_kgamma(res, mode=phase_mode), use_container_width=True)
-            
+
+    st.plotly_chart(plot_polar_forces(res), use_container_width=True)
+  
     with r3_c2:
         with st.container(border=True):
             st.markdown("#### $K_\gamma$ Information")
