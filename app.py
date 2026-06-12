@@ -580,19 +580,27 @@ def main():
     
     if has_sens:
         r7_c1, r7_c2, r7_c3 = st.columns(3)
+        
         with r7_c1:
             with st.container(border=True):
-                # Check if BOTH eccentricity and support stiffness are enabled
+                # Eccentricity
                 if inputs.get('enable_periodic_ecc', False) and inputs.get('k_support_w_Nm', 0) > 0:
                     st.plotly_chart(plot_sens(sens, 'eccentricity', "Eccentricity amplitude [um]", "K_γ vs Eccentricity", "circle"), use_container_width=True)
+                    st.caption("Shows how worst-case load sharing changes as periodic eccentricity increases. A steeper rise means the system is more sensitive to rotating compatibility errors.")
                 else:
                     st.warning("Eccentricity graph hidden: Eccentricity Effects and Settlement Support must be enabled to view this data.")
+                    
         with r7_c2:
             with st.container(border=True):
-                st.plotly_chart(plot_sens(sens, 'mesh_scale', "Mesh scale factor [-]", "K_γ vs Mesh Scale", "square"), use_container_width=True)
+                # Mesh Scale
+                st.plotly_chart(plot_sens(sens, 'mesh_scale', "Mesh stiffness scale factor [-]", "K_γ vs Mesh Stiffness", "square"), use_container_width=True)
+                st.caption("Shows how worst-case load sharing changes when overall mesh stiffness is scaled. Strong variation means the result depends heavily on tooth-mesh stiffness assumptions.")
+                
         with r7_c3:
             with st.container(border=True):
-                st.plotly_chart(plot_sens(sens, 'bearing_scale', "Bearing scale factor [-]", "K_γ vs Bearing Scale", "diamond"), use_container_width=True)
+                # Bearing Scale
+                st.plotly_chart(plot_sens(sens, 'bearing_scale', "Bearing stiffness scale factor [-]", "K_γ vs Support Stiffness", "diamond"), use_container_width=True)
+                st.caption("Shows how worst-case load sharing changes with bearing/support stiffness. Strong sensitivity means support flexibility strongly affects how the load redistributes.")
     else:
         st.warning("Sensitivity study disabled. Enable in Advanced Effects to view.")
 
