@@ -193,7 +193,8 @@ def plot_phase_planet(res: dict, key: str, title: str, ylabel: str) -> go.Figure
     for i in range(res['N']):
         y = res[key][i, :]
         if key == 'e_total_phase_m': y = y * 1e6
-        fig.add_trace(go.Scatter(x=phase_deg, y=y, mode='lines', line=dict(width=1.5, color=colors[i%len(colors)]), name=f"P{i+1}"))
+        # CHANGED line width from 1.5 to 3 here!
+        fig.add_trace(go.Scatter(x=phase_deg, y=y, mode='lines', line=dict(width=3, color=colors[i%len(colors)]), name=f"P{i+1}"))
     fig.add_vline(x=worst_deg, line_dash="dash", line_color="red", annotation_text="Worst", annotation_textangle=-90)
     if key == 'LSF_phase': fig.add_hline(y=1.0, line_dash="dot", line_color="black")
     if key == 'e_total_phase_m': fig.add_hline(y=0.0, line_dash="dot", line_color="black")
@@ -207,33 +208,31 @@ def plot_polar_forces(res: dict) -> go.Figure:
     phase_deg = np.rad2deg(res['phase_rad'])
     colors = px.colors.qualitative.D3
     
-    # Calculate min and max forces to zoom the graph in perfectly
     nom_force = res['W_nominal_N']
     min_force = np.min(res['force_phase_N'])
     max_force = np.max(res['force_phase_N'])
     
-    # Create a small visual buffer around the edges
     span = max_force - min_force
     if span < 1e-3: span = nom_force * 0.05
     r_min = max(0, min_force - span * 0.5)
     r_max = max_force + span * 0.5
     
-    # Draw a perfect dashed circle representing what the force SHOULD be (Nominal)
     fig.add_trace(go.Scatterpolar(
         r=[nom_force]*len(phase_deg),
         theta=phase_deg,
         mode='lines',
-        line=dict(color='black', dash='dash', width=1.5),
+        # Made the dashed line slightly thicker too
+        line=dict(color='black', dash='dash', width=2),
         name='Nominal Force'
     ))
     
-    # Draw the actual fluctuating force for each planet
     for i in range(res['N']):
         fig.add_trace(go.Scatterpolar(
             r=res['force_phase_N'][i, :],
             theta=phase_deg,
             mode='lines',
-            line=dict(width=2, color=colors[i % len(colors)]),
+            # CHANGED line width from 2 to 3 here!
+            line=dict(width=3, color=colors[i % len(colors)]),
             name=f"Planet {i+1}"
         ))
         
@@ -241,7 +240,7 @@ def plot_polar_forces(res: dict) -> go.Figure:
         title=dict(text="Polar Force Distribution vs Carrier Phase", font=dict(size=14)),
         polar=dict(
             radialaxis=dict(visible=True, title="Force [N]", range=[r_min, r_max]),
-            angularaxis=dict(direction="clockwise", rotation=90) # 0 degrees at the top
+            angularaxis=dict(direction="clockwise", rotation=90) 
         ),
         showlegend=True,
         margin=dict(l=30, r=30, t=40, b=30)
@@ -579,18 +578,22 @@ def main():
             elif phase_mode == "Percent variation":
                 st.latex(r"y = \left( \frac{K_{\gamma} - \mu(K_{\gamma})}{\mu(K_{\gamma})} \right) \times 100")
 
-    # 6. ROW 4: PLANET LSF AND FORCE VS PHASE
+    # 6. ROW 4: PLANET LSF AND FORCE VS PHASE (WITH DROPDOWN)
     r4_c1, r4_c2 = st.columns(2)
+    
     with r4_c1:
         with st.container(border=True):
             st.plotly_chart(plot_phase_planet(res, 'LSF_phase', "Individual Planet LSF vs Phase", "LSF [-]"), use_container_width=True)
+            
     with r4_c2:
         with st.container(border=True):
-            st.plotly_chart(plot_phase_planet(res, 'force_phase_N', "Individual Planet Force vs Phase", "Force [N]"), use_container_width=True)
-
-    with st.container(border=True):
-        st.plotly_chart(plot_polar_forces(res), use_container_width=True)
-
+            # Create a dropdown to toggle the graph style!
+            force_mode = st.selectbox("Force representation", ["Linear", "Polar"], index=0)
+            
+            if force_mode == "Linear":
+                st.plotly_chart(plot_phase_planet(res, 'force_phase_N', "Individual Planet Force vs Phase", "Force [N]"), use_container_width=True)
+            else:
+                st.plotly_chart(plot_polar_forces(res), use_container_width=True)
 
     # 7. MONTE CARLO & TRENDS
     mc = res.get('monte_carlo')
