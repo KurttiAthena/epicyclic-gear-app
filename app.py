@@ -160,6 +160,33 @@ def plot_schematic(res: dict, R_sun_mm: float) -> go.Figure:
     fig.update_yaxes(scaleanchor="x", scaleratio=1)
     return fig
 
+def plot_sun_orbit(res: dict) -> go.Figure:
+    fig = go.Figure()
+    
+    # Extract phi_x and phi_y tilts in milliradians
+    phi_x = res['sun_q_phase'][1, :] * 1000
+    phi_y = res['sun_q_phase'][2, :] * 1000
+    
+    # Plot the continuous orbit path
+    fig.add_trace(go.Scatter(
+        x=phi_x, y=phi_y, mode='lines', 
+        line=dict(color='#8E44AD', width=2), name='Orbit Path'
+    ))
+    
+    # Highlight the worst-case phase point so we know exactly where the maximum LSF happened
+    idx = res['worst_phase_index']
+    fig.add_trace(go.Scatter(
+        x=[phi_x[idx]], y=[phi_y[idx]], mode='markers', 
+        marker=dict(color='red', size=12, symbol='star'), name='Worst Phase'
+    ))
+    
+    _fig_layout(fig, "Sun Gear Orbit (Tilt Locus)", "φ_x [mrad]", "φ_y [mrad]")
+    
+    # This locks the aspect ratio so the orbit isn't stretched out!
+    fig.update_yaxes(scaleanchor="x", scaleratio=1) 
+    
+    return fig
+
 def plot_phase_kgamma(res: dict, mode: str = 'Raw K_gamma') -> go.Figure:
     phase_deg, worst_deg = np.rad2deg(res['phase_rad']), np.rad2deg(res['worst_phase_rad'])
     K_raw = res['K_gamma_phase'].flatten()
@@ -540,10 +567,19 @@ def main():
             st.plotly_chart(plot_lsf_bar(res), use_container_width=True)
     with r1_c2:
         with st.container(border=True):
-            st.plotly_chart(plot_schematic(res, st.session_state['inputs'].get('R_sun_mm', 50)), use_container_width=True)
+            # The Toggle Dropdown!
+            viz_mode = st.selectbox("Visualization mode", ["System Schematic", "Sun Gear Orbit"], index=0)
+            
+            if viz_mode == "System Schematic":
+                st.plotly_chart(plot_schematic(res, st.session_state['inputs'].get('R_sun_mm', 50)), use_container_width=True)
+            else:
+                st.plotly_chart(plot_sun_orbit(res), use_container_width=True)
+                
+        # We only show the descriptive banners if the Schematic is currently visible
+        if viz_mode == "System Schematic":
             ecc_xy = res['ecc_xy_phase_m'][:, res['worst_phase_index']] * 1000
-        st.info("**Color Convention:** Red = Sun gear | Gray circles = Planets | Blue arrow = Tilt direction | Green dashed cirlce = Eccentricity")
-        st.info(f"**Displacement:** w = {res['sun_displacement_final'][0]*1e6:.2f} um | phi_x = {res['sun_displacement_final'][1]*1e3:.3f} mrad | phi_y = {res['sun_displacement_final'][2]*1e3:.3f} mrad | ecc = [{ecc_xy[0]:.3f}, {ecc_xy[1]:.3f}] mm")
+            st.info("**Color Convention:** Red = Sun gear | Gray circles = Planets | Blue arrow = Tilt direction | Green dashed circle = Eccentricity")
+            st.info(f"**Displacement:** w = {res['sun_displacement_final'][0]*1e6:.2f} um | phi_x = {res['sun_displacement_final'][1]*1e3:.3f} mrad | phi_y = {res['sun_displacement_final'][2]*1e3:.3f} mrad | ecc = [{ecc_xy[0]:.3f}, {ecc_xy[1]:.3f}] mm")
 
     # 4. ROW 2: ERROR BREAKDOWN AND EQ ERROR
     r2_c1, r2_c2 = st.columns(2)
