@@ -208,7 +208,7 @@ def plot_polar_forces(res: dict) -> go.Figure:
     phase_deg = np.rad2deg(res['phase_rad'])
     colors = px.colors.qualitative.D3
     
-    nom_force = res['W_nominal_N']
+    nom_force = res['W_nominal_N'] / res['N']
     min_force = np.min(res['force_phase_N'])
     max_force = np.max(res['force_phase_N'])
     
