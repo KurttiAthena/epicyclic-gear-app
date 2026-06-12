@@ -561,10 +561,16 @@ def main():
             st.dataframe(df, use_container_width=True, hide_index=True)
             
     # 3. ROW 1: LSF AND SCHEMATIC
+    # Calculate ecc_xy up here first, so both columns can use it without crashing!
+    ecc_xy = res['ecc_xy_phase_m'][:, res['worst_phase_index']] * 1000
+
     r1_c1, r1_c2 = st.columns(2)
+    
     with r1_c1:
         with st.container(border=True):
             st.plotly_chart(plot_lsf_bar(res), use_container_width=True)
+            
+        # This sits nicely under the LSF box!
         st.info(f"**Displacement:** w = {res['sun_displacement_final'][0]*1e6:.2f} um | phi_x = {res['sun_displacement_final'][1]*1e3:.3f} mrad | phi_y = {res['sun_displacement_final'][2]*1e3:.3f} mrad | ecc = [{ecc_xy[0]:.3f}, {ecc_xy[1]:.3f}] mm")
       
     with r1_c2:
@@ -577,9 +583,8 @@ def main():
             else:
                 st.plotly_chart(plot_sun_orbit(res), use_container_width=True)
                 
-        # We only show the descriptive banners if the Schematic is currently visible
+        # We only show the color convention banner if the Schematic is actually visible
         if viz_mode == "System Schematic":
-            ecc_xy = res['ecc_xy_phase_m'][:, res['worst_phase_index']] * 1000
             st.info("**Color Convention:** Red = Sun gear | Gray circles = Planets | Blue arrow = Tilt direction | Green dashed circle = Eccentricity")
 
     # 4. ROW 2: ERROR BREAKDOWN AND EQ ERROR
