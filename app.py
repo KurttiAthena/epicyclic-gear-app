@@ -207,8 +207,18 @@ def plot_polar_forces(res: dict) -> go.Figure:
     phase_deg = np.rad2deg(res['phase_rad'])
     colors = px.colors.qualitative.D3
     
-    # Draw a perfect dashed circle representing what the force SHOULD be (Nominal)
+    # Calculate min and max forces to zoom the graph in perfectly
     nom_force = res['W_nominal_N']
+    min_force = np.min(res['force_phase_N'])
+    max_force = np.max(res['force_phase_N'])
+    
+    # Create a small visual buffer around the edges
+    span = max_force - min_force
+    if span < 1e-3: span = nom_force * 0.05
+    r_min = max(0, min_force - span * 0.5)
+    r_max = max_force + span * 0.5
+    
+    # Draw a perfect dashed circle representing what the force SHOULD be (Nominal)
     fig.add_trace(go.Scatterpolar(
         r=[nom_force]*len(phase_deg),
         theta=phase_deg,
@@ -230,14 +240,13 @@ def plot_polar_forces(res: dict) -> go.Figure:
     fig.update_layout(
         title=dict(text="Polar Force Distribution vs Carrier Phase", font=dict(size=14)),
         polar=dict(
-            radialaxis=dict(visible=True, title="Force [N]"),
+            radialaxis=dict(visible=True, title="Force [N]", range=[r_min, r_max]),
             angularaxis=dict(direction="clockwise", rotation=90) # 0 degrees at the top
         ),
         showlegend=True,
         margin=dict(l=30, r=30, t=40, b=30)
     )
     return fig
-
   
 def plot_mc_hist(mc: dict) -> go.Figure:
     # Changed nbinsx from 16 to 25 for more detailed bars
