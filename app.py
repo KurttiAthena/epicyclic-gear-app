@@ -566,6 +566,7 @@ def main():
         with st.container(border=True):
             st.plotly_chart(plot_lsf_bar(res), use_container_width=True)
         st.info(f"**Displacement:** w = {res['sun_displacement_final'][0]*1e6:.2f} um | phi_x = {res['sun_displacement_final'][1]*1e3:.3f} mrad | phi_y = {res['sun_displacement_final'][2]*1e3:.3f} mrad | ecc = [{ecc_xy[0]:.3f}, {ecc_xy[1]:.3f}] mm")
+      
     with r1_c2:
         with st.container(border=True):
             # The Toggle Dropdown!
