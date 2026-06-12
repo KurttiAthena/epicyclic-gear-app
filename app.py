@@ -179,7 +179,7 @@ def plot_phase_kgamma(res: dict, mode: str = 'Raw K_gamma') -> go.Figure:
         y_label = "K_γ [-]"
 
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=phase_deg, y=y_data, mode='lines', line=dict(width=2, color="#2e86c1"), showlegend=False))
+    fig.add_trace(go.Scatter(x=phase_deg, y=y_data, mode='lines', line=dict(width=3, color="#2e86c1"), showlegend=False))
     fig.add_vline(x=worst_deg, line_dash="dash", line_color="red", annotation_text="Worst phase", annotation_textangle=-90)
     
     _fig_layout(fig, f"Phase Response: K_γ vs Phase ({mode})", "Phase angle [deg / rad]", y_label, yaxis_range=_auto_y_range(y_data))
@@ -208,7 +208,8 @@ def plot_polar_forces(res: dict) -> go.Figure:
     phase_deg = np.rad2deg(res['phase_rad'])
     colors = px.colors.qualitative.D3
     
-    nom_force = res['W_nominal_N'] / res['N']
+    # Calculate the exact numerical average of all planet normal forces
+    nom_force = np.mean(res['force_phase_N'])
     min_force = np.min(res['force_phase_N'])
     max_force = np.max(res['force_phase_N'])
     
