@@ -585,6 +585,7 @@ def main():
     with r4_c1:
         with st.container(border=True):
             st.plotly_chart(plot_phase_planet(res, 'LSF_phase', "Individual Planet LSF vs Phase", "LSF [-]"), use_container_width=True)
+        st.info("Toggle visibility of any of the individual planet plots on/off by clicking on them in each graph's respective legend.") 
             
     with r4_c2:
         with st.container(border=True):
