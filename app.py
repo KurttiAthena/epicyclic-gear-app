@@ -611,7 +611,8 @@ def main():
                     )
                 except FileNotFoundError:
                     st.button("README Not Found", disabled=True, use_container_width=True)
-            
+
+    st.markdown("### System Overview")
     # 3. ROW 1: LSF AND SCHEMATIC
     # Calculate ecc_xy up here first, so both columns can use it without crashing!
     ecc_xy = res['ecc_xy_phase_m'][:, res['worst_phase_index']] * 1000
@@ -639,17 +640,25 @@ def main():
         if viz_mode == "System Schematic":
             st.info("**Color Convention:** Red = Sun gear | Gray circles = Planets | Blue arrow = Tilt direction | Green dashed circle = Eccentricity")
 
+    st.markdown("### Error Decomposition")
     # 4. ROW 2: ERROR BREAKDOWN AND EQ ERROR
     r2_c1, r2_c2 = st.columns(2)
     with r2_c1:
         with st.container(border=True):
             st.plotly_chart(plot_error_components(res), use_container_width=True)
         st.info("Decomposition of static manufacturing tolerances into equivalent line-of-action errors. Click on an error in the legend to remove its component from the graph.")
+    
     with r2_c2:
-        with st.container(border=True):
-            st.plotly_chart(plot_phase_planet(res, 'e_total_phase_m', "Equivalent Error vs Phase", "Error [um]"), use_container_width=True)
-        st.info("Total effective compatibility error acting on each planet as the carrier rotates.")
+        has_phase = st.session_state['inputs'].get('enable_periodic_ecc', False) or st.session_state['inputs'].get('enable_periodic_stiffness', False)
+        
+        if has_phase:
+            with st.container(border=True):
+                st.plotly_chart(plot_phase_planet(res, 'e_total_phase_m', "Equivalent Error vs Phase", "Error [um]"), use_container_width=True)
+            st.info("Total effective compatibility error acting on each planet as the carrier rotates.")
+        else:
+            st.warning("Equivalent Error vs Phase plot disabled. Phase-varying effects are inactive, meaning errors are constant and do not fluctuate as the carrier rotates.")
 
+    st.markdown("### Phase Response & Load Sharing")
     # 5. ROW 3: PHASE RESPONSE (K_GAMMA + MODES)
     r3_c1, r3_c2 = st.columns([1.3, 0.7])
     with r3_c1:
@@ -693,6 +702,7 @@ def main():
             elif phase_mode == "Percent variation":
                 st.latex(r"y = \left( \frac{K_{\gamma} - \mu(K_{\gamma})}{\mu(K_{\gamma})} \right) \times 100")
 
+    st.markdown("### Planet-Specific Forces")
     # 6. ROW 4: PLANET LSF AND FORCE VS PHASE (WITH DROPDOWN)
     has_phase = st.session_state['inputs'].get('enable_periodic_ecc', False) or st.session_state['inputs'].get('enable_periodic_stiffness', False)
     
