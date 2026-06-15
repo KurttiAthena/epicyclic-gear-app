@@ -692,22 +692,27 @@ def main():
                 st.latex(r"y = \left( \frac{K_{\gamma} - \mu(K_{\gamma})}{\mu(K_{\gamma})} \right) \times 100")
 
     # 6. ROW 4: PLANET LSF AND FORCE VS PHASE (WITH DROPDOWN)
-    r4_c1, r4_c2 = st.columns(2)
-    
-    with r4_c1:
-        with st.container(border=True):
-            st.plotly_chart(plot_phase_planet(res, 'LSF_phase', "Individual Planet LSF vs Phase", "LSF [-]"), use_container_width=True)
-        st.info("Toggle visibility of any of the individual planet plots on/off by clicking on them in each graph's respective legend.") 
-            
-    with r4_c2:
-        with st.container(border=True):
-            # Create a dropdown to toggle the graph style!
-            force_mode = st.selectbox("Force representation", ["Linear", "Polar"], index=0)
-            
-            if force_mode == "Linear":
-                st.plotly_chart(plot_phase_planet(res, 'force_phase_N', "Individual Planet Force vs Phase", "Force [N]"), use_container_width=True)
-            else:
-                st.plotly_chart(plot_polar_forces(res), use_container_width=True)
+    if res['K_gamma_span'] > 1e-5:
+        r4_c1, r4_c2 = st.columns(2)
+        
+        with r4_c1:
+            with st.container(border=True):
+                st.plotly_chart(plot_phase_planet(res, 'LSF_phase', "Individual Planet LSF vs Phase", "LSF [-]"), use_container_width=True)
+            st.info("Toggle visibility of any of the individual planet plots on/off by clicking on them in each graph's respective legend.") 
+                
+        with r4_c2:
+            with st.container(border=True):
+                # Create a dropdown to toggle the graph style!
+                force_mode = st.selectbox("Force representation", ["Linear", "Polar"], index=0)
+                
+                if force_mode == "Linear":
+                    st.plotly_chart(plot_phase_planet(res, 'force_phase_N', "Individual Planet Force vs Phase", "Force [N]"), use_container_width=True)
+                else:
+                    st.plotly_chart(plot_polar_forces(res), use_container_width=True)
+    else:
+        # Hide the graphs and show a warning banner instead!
+        st.warning("Planet Phase Response graphs disabled. Phase-varying effects (like periodic eccentricity) are not active, so planet forces are constant and cannot be differentiated by phase.")
+
 
     # 7. MONTE CARLO & TRENDS
     mc = res.get('monte_carlo')
