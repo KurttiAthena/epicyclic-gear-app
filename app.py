@@ -661,12 +661,14 @@ def main():
         with st.container(border=True):
             st.markdown("#### $K_\gamma$ Information")
             
-            # Check if there is actually any phase variation!
-            if res['K_gamma_span'] > 1e-5:
+            # Look at the checkboxes instead of the math!
+            has_phase = st.session_state['inputs'].get('enable_periodic_ecc', False) or st.session_state['inputs'].get('enable_periodic_stiffness', False)
+            
+            if has_phase:
                 st.markdown(f"**Worst phase:** {np.rad2deg(res['worst_phase_rad']):.2f}° ({res['worst_phase_rad']:.3f} rad)")
                 st.markdown(f"**$K_\gamma$ max:** {res['K_gamma_max']:.6f}  \n**$K_\gamma$ span:** {res['K_gamma_span']:.6g}")
             else:
-                st.info("Phase-varying effects are disabled or zero. Load sharing is constant, so there is no unique 'worst phase'.")
+                st.info("Phase-varying effects are disabled. Load sharing is constant, so there is no unique 'worst phase'.")
                 st.markdown(f"**$K_\gamma$ (Constant):** {res['K_gamma_max']:.6f}")
                 
             st.markdown("---")
@@ -692,7 +694,9 @@ def main():
                 st.latex(r"y = \left( \frac{K_{\gamma} - \mu(K_{\gamma})}{\mu(K_{\gamma})} \right) \times 100")
 
     # 6. ROW 4: PLANET LSF AND FORCE VS PHASE (WITH DROPDOWN)
-    if res['K_gamma_span'] > 1e-5:
+    has_phase = st.session_state['inputs'].get('enable_periodic_ecc', False) or st.session_state['inputs'].get('enable_periodic_stiffness', False)
+    
+    if has_phase:
         r4_c1, r4_c2 = st.columns(2)
         
         with r4_c1:
