@@ -559,6 +559,13 @@ def main():
                 'EqError_um': res['e_total_phase_m'][:, idx]*1e6
             })
             st.dataframe(df, use_container_width=True, hide_index=True)
+            csv = df.to_csv(index=False).encode('utf-8')
+            st.download_button(
+                label="Download Results (CSV)",
+                data=csv,
+                file_name="epicyclic_gear_results.csv",
+                mime="text/csv",
+            )
             
     # 3. ROW 1: LSF AND SCHEMATIC
     # Calculate ecc_xy up here first, so both columns can use it without crashing!
@@ -592,10 +599,11 @@ def main():
     with r2_c1:
         with st.container(border=True):
             st.plotly_chart(plot_error_components(res), use_container_width=True)
+        st.info("Decomposition of static manufacturing tolerances into equivalent line-of-action errors. Click on an error in the legend to remove its component from the graph.")
     with r2_c2:
         with st.container(border=True):
             st.plotly_chart(plot_phase_planet(res, 'e_total_phase_m', "Equivalent Error vs Phase", "Error [um]"), use_container_width=True)
-            st.info("Total effective compatibility error acting on each planet as the carrier rotates.")
+        st.info("Total effective compatibility error acting on each planet as the carrier rotates.")
 
     # 5. ROW 3: PHASE RESPONSE (K_GAMMA + MODES)
     r3_c1, r3_c2 = st.columns([1.3, 0.7])
@@ -609,7 +617,16 @@ def main():
             st.markdown("#### $K_\gamma$ Information")
             st.markdown(f"**Worst phase:** {np.rad2deg(res['worst_phase_rad']):.2f}° ({res['worst_phase_rad']:.3f} rad)")
             st.markdown(f"**$K_\gamma$ max:** {res['K_gamma_max']:.6f}  \n**$K_\gamma$ span:** {res['K_gamma_span']:.6g}")
-            
+            st.markdown("---")
+            # Automatically grades the load sharing!
+            k_max = res['K_gamma_max']
+            if k_max < 1.05:
+                st.success("🟢 **Status: Excellent.** Load sharing is highly uniform.")
+            elif k_max < 1.15:
+                st.warning("🟡 **Status: Acceptable.** Moderate unequal load sharing.")
+            else:
+                st.error("🔴 **Status: Poor.** Severe overloading on specific planets!")
+
             st.markdown("---")
             st.markdown("**Equation used:**")
             if phase_mode == "Raw K_gamma":
