@@ -598,14 +598,13 @@ def main():
                     st.button("Report Not Found", disabled=True, use_container_width=True)
                     
             with dl3:
-                # Make sure you have a file named "README.pdf" in the exact same folder!
                 try:
-                    with open("README.pdf", "rb") as readme_file:
+                    with open("README_Instructions and Information for using EpicyclicGearApp.pdf", "rb") as readme_file:
                         ReadmeByte = readme_file.read()
                     st.download_button(
                         label="Download README",
                         data=ReadmeByte,
-                        file_name="README.pdf",
+                        file_name="README_EpicyclicGearApp.pdf",
                         mime='application/octet-stream',
                         use_container_width=True
                     )
