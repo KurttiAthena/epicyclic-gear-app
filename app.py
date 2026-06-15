@@ -569,12 +569,48 @@ def main():
             })
             st.dataframe(df, use_container_width=True, hide_index=True)
             csv = df.to_csv(index=False).encode('utf-8')
-            st.download_button(
-                label="Download Results (CSV)",
-                data=csv,
-                file_name="epicyclic_gear_results.csv",
-                mime="text/csv",
-            )
+                        # Create a clean row of 3 buttons at the bottom of the table
+            dl1, dl2, dl3 = st.columns(3)
+            
+            with dl1:
+                csv = df.to_csv(index=False).encode('utf-8')
+                st.download_button(
+                    label="Download Results (CSV)",
+                    data=csv,
+                    file_name="epicyclic_gear_results.csv",
+                    mime="text/csv",
+                    use_container_width=True
+                )
+                
+            with dl2:
+                try:
+                    with open("Numerical_Modelling_Tool_for_Load_Sharing_Behavior_of_Epicyclic_Gears.pdf", "rb") as pdf_file:
+                        PDFbyte = pdf_file.read()
+                    st.download_button(
+                        label="Download Report",
+                        data=PDFbyte,
+                        file_name="Report.pdf",
+                        mime='application/octet-stream',
+                        use_container_width=True
+                    )
+                except FileNotFoundError:
+                    # If the file is missing, the button elegantly greys out
+                    st.button("Report Not Found", disabled=True, use_container_width=True)
+                    
+            with dl3:
+                # Make sure you have a file named "README.pdf" in the exact same folder!
+                try:
+                    with open("README.pdf", "rb") as readme_file:
+                        ReadmeByte = readme_file.read()
+                    st.download_button(
+                        label="Download README",
+                        data=ReadmeByte,
+                        file_name="README.pdf",
+                        mime='application/octet-stream',
+                        use_container_width=True
+                    )
+                except FileNotFoundError:
+                    st.button("README Not Found", disabled=True, use_container_width=True)
             
     # 3. ROW 1: LSF AND SCHEMATIC
     # Calculate ecc_xy up here first, so both columns can use it without crashing!
