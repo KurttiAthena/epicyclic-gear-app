@@ -660,9 +660,17 @@ def main():
     with r3_c2:
         with st.container(border=True):
             st.markdown("#### $K_\gamma$ Information")
-            st.markdown(f"**Worst phase:** {np.rad2deg(res['worst_phase_rad']):.2f}° ({res['worst_phase_rad']:.3f} rad)")
-            st.markdown(f"**$K_\gamma$ max:** {res['K_gamma_max']:.6f}  \n**$K_\gamma$ span:** {res['K_gamma_span']:.6g}")
+            
+            # Check if there is actually any phase variation!
+            if res['K_gamma_span'] > 1e-5:
+                st.markdown(f"**Worst phase:** {np.rad2deg(res['worst_phase_rad']):.2f}° ({res['worst_phase_rad']:.3f} rad)")
+                st.markdown(f"**$K_\gamma$ max:** {res['K_gamma_max']:.6f}  \n**$K_\gamma$ span:** {res['K_gamma_span']:.6g}")
+            else:
+                st.info("Phase-varying effects are disabled or zero. Load sharing is constant, so there is no unique 'worst phase'.")
+                st.markdown(f"**$K_\gamma$ (Constant):** {res['K_gamma_max']:.6f}")
+                
             st.markdown("---")
+            
             # Automatically grades the load sharing!
             k_max = res['K_gamma_max']
             if k_max < 1.05:
