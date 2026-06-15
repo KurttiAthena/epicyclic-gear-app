@@ -589,7 +589,7 @@ def main():
                     st.download_button(
                         label="Download Report",
                         data=PDFbyte,
-                        file_name="Report.pdf",
+                        file_name="Numerical_Modelling_Tool_for_Load_Sharing_Behavior_of_Epicyclic_Gears.pdf",
                         mime='application/octet-stream',
                         use_container_width=True
                     )
