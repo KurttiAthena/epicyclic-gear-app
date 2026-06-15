@@ -92,7 +92,7 @@ def plot_error_components(res: dict) -> go.Figure:
     for y_vals, name, color in zip(data, names, colors):
         fig.add_trace(go.Bar(x=list(range(1, N + 1)), y=y_vals, name=name, marker_color=color))
     fig.add_trace(go.Scatter(x=list(range(1, N + 1)), y=e_total_worst, mode='lines+markers', name='Total', line=dict(color='black', width=2), marker=dict(size=6, color='black')))
-        max_abs = max(np.max(np.abs(e_total_worst)), 1)
+    max_abs = max(np.max(np.abs(e_total_worst)), 1)
     
     # First apply the standard layout
     _fig_layout(fig, "Error Component Breakdown (Worst Phase)", "Planet Index", "Equivalent error [μm]", yaxis_range=[-1.15 * max_abs, 1.15 * max_abs])
