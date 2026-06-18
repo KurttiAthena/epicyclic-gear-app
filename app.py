@@ -287,7 +287,7 @@ def plot_polar_forces(res: dict) -> go.Figure:
 def plot_mc_hist(mc: dict) -> go.Figure:
     # Changed nbinsx from 16 to 25 for more detailed bars
     fig = go.Figure(data=[go.Histogram(x=mc['K_gamma_max_all'], nbinsx=25, marker_color="#4285F4", marker_line=dict(color="white", width=1))])
-    fig = _fig_layout(fig, "Monte Carlo: K_γ,max distribution", "K_γ,max [-]", "Count")
+    fig = _fig_layout(fig, "K_γ,max distribution", "K_γ,max [-]", "Count")
     
     # Force Plotly to draw a lot more ticks (e.g., ~15 ticks) on the X axis
     fig.update_xaxes(nticks=15)
@@ -299,7 +299,7 @@ def plot_mc_box(mc: dict, N: int) -> go.Figure:
     for i in range(N):
         fig.add_trace(go.Box(y=mc['LSF_worst_all'][i, :], name=f"{i+1}", marker_color=px.colors.qualitative.D3[i % 10], boxmean=True))
     fig.add_hline(y=1.0, line_dash="dash", line_color="red", annotation_text="Ideal=1")
-    return _fig_layout(fig, "Monte Carlo: worst-phase LSF by planet", "Planet index", "Worst-phase LSF [-]")
+    return _fig_layout(fig, "Worst-phase LSF by planet", "Planet index", "Worst-phase LSF [-]")
 
 def plot_trend(res: dict, k_w: float, is_stiff: bool) -> go.Figure:
     geom = res.get('geometry')
