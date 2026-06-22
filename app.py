@@ -111,7 +111,7 @@ def plot_schematic(res: dict, R_sun_mm: float) -> go.Figure:
     N = res['N']
     if N > 12:
         fig = go.Figure()
-        fig.add_annotation(text="System Schematic has been disabled<br>due to spacing issues",
+        fig.add_annotation(text="System Schematic has been disabled<br>due to spacing issues. Please select<br>less than 12 planets for plot to<br>be visible.",
                            xref="paper", yref="paper", x=0.5, y=0.5, showarrow=False, font=dict(size=14, color="red"))
         _fig_layout(fig, "System Schematic (qualitative)", "", "")
         fig.update_xaxes(visible=False)
