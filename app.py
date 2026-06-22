@@ -109,6 +109,15 @@ def plot_error_components(res: dict) -> go.Figure:
 
 def plot_schematic(res: dict, R_sun_mm: float) -> go.Figure:
     N = res['N']
+    if N > 12:
+        fig = go.Figure()
+        fig.add_annotation(text="System Schematic has been disabled<br>due to spacing issues",
+                           xref="paper", yref="paper", x=0.5, y=0.5, showarrow=False, font=dict(size=14, color="red"))
+        _fig_layout(fig, "System Schematic (qualitative)", "", "")
+        fig.update_xaxes(visible=False)
+        fig.update_yaxes(visible=False)
+        return fig
+      
     r_plot = 1.8 * R_sun_mm
     fig = go.Figure()
     th = np.linspace(0, 2 * math.pi, 100)
@@ -345,7 +354,7 @@ def collect_inputs():
         c1, c2, c3 = st.columns(3)
         with c1:
             st.markdown("**Basic Inputs**")
-            inputs['N'] = st.number_input("Number of planets", 3, 12, 5)
+            inputs['N'] = int(st.number_input("Number of planets", min_value=3, max_value=100, value=5))
             inputs['T_input_Nm'] = st.number_input("Input torque [Nm]", value=1000.0)
             inputs['R_sun_mm'] = st.number_input("Sun radius [mm]", value=50.0)
             inputs['alpha_n_deg'] = float(st.selectbox("Normal pressure angle", ["14", "20", "25"], index=1))
