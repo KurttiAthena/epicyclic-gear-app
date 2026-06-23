@@ -373,7 +373,7 @@ def collect_inputs():
                         mime='application/octet-stream',
                         use_container_width=True
                     )
-                except FileNotFoundError:
+             except FileNotFoundError:
                     st.button("README Not Found", disabled=True, use_container_width=True)
             
         with c2:
