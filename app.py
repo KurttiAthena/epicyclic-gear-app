@@ -364,7 +364,7 @@ def collect_inputs():
             mod_geom = st.checkbox("Modify geometrical constraints?", False)
             show_adv = st.checkbox("Show advanced effects?", False)
             try:
-                with open("README_Instructions_and Information_for_using_EpicyclicGearApp.pdf", "rb") as readme_file:
+                with open("README_Instructions_and_Information_for_using_EpicyclicGearApp.pdf", "rb") as readme_file:
                     ReadmeByte = readme_file.read()
                 st.download_button(
                     label="Download README",
