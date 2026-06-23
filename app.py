@@ -363,6 +363,18 @@ def collect_inputs():
             st.markdown("---")
             mod_geom = st.checkbox("Modify geometrical constraints?", False)
             show_adv = st.checkbox("Show advanced effects?", False)
+            try:
+                with open("README_Instructions_and_Information_for_using_EpicyclicGearApp.pdf", "rb") as readme_file:
+                        ReadmeByte = readme_file.read()
+                    st.download_button(
+                        label="Download README",
+                        data=ReadmeByte,
+                        file_name="README_EpicyclicGearApp.pdf",
+                        mime='application/octet-stream',
+                        use_container_width=True
+                    )
+                except FileNotFoundError:
+                    st.button("README Not Found", disabled=True, use_container_width=True)
             
         with c2:
             st.markdown("**Geometry & Offsets**")
@@ -579,7 +591,7 @@ def main():
             st.dataframe(df, use_container_width=True, hide_index=True)
             csv = df.to_csv(index=False).encode('utf-8')
                         # Create a clean row of 3 buttons at the bottom of the table
-            dl1, dl2, dl3 = st.columns(3)
+            dl1, dl2 = st.columns(2)
             
             with dl1:
                 csv = df.to_csv(index=False).encode('utf-8')
@@ -606,19 +618,6 @@ def main():
                     # If the file is missing, the button elegantly greys out
                     st.button("Report Not Found", disabled=True, use_container_width=True)
                     
-            with dl3:
-                try:
-                    with open("README_Instructions_and_Information_for_using_EpicyclicGearApp.pdf", "rb") as readme_file:
-                        ReadmeByte = readme_file.read()
-                    st.download_button(
-                        label="Download README",
-                        data=ReadmeByte,
-                        file_name="README_EpicyclicGearApp.pdf",
-                        mime='application/octet-stream',
-                        use_container_width=True
-                    )
-                except FileNotFoundError:
-                    st.button("README Not Found", disabled=True, use_container_width=True)
 
     st.markdown("### System Overview")
     # 3. ROW 1: LSF AND SCHEMATIC
