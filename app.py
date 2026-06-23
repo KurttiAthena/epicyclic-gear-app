@@ -364,17 +364,17 @@ def collect_inputs():
             mod_geom = st.checkbox("Modify geometrical constraints?", False)
             show_adv = st.checkbox("Show advanced effects?", False)
             try:
-                with open("README_Instructions_and_Information_for_using_EpicyclicGearApp.pdf", "rb") as readme_file:
-                        ReadmeByte = readme_file.read()
-                    st.download_button(
-                        label="Download README",
-                        data=ReadmeByte,
-                        file_name="README_EpicyclicGearApp.pdf",
-                        mime='application/octet-stream',
-                        use_container_width=True
-                    )
-             except FileNotFoundError:
-                    st.button("README Not Found", disabled=True, use_container_width=True)
+                with open("README_Instructions_and Information_for_using_EpicyclicGearApp.pdf", "rb") as readme_file:
+                    ReadmeByte = readme_file.read()
+                st.download_button(
+                    label="Download README",
+                    data=ReadmeByte,
+                    file_name="README_EpicyclicGearApp.pdf",
+                    mime='application/octet-stream',
+                    use_container_width=True
+                )
+            except FileNotFoundError:
+                st.button("README Not Found", disabled=True, use_container_width=True)
             
         with c2:
             st.markdown("**Geometry & Offsets**")
